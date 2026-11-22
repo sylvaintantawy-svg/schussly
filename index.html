@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFFFFF" id="themecolor">
-<script>try{if(localStorage.getItem('sch-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<meta name="color-scheme" content="only light" id="colorscheme">
+<script>try{if(localStorage.getItem('sch-theme')==='dark'){document.documentElement.dataset.theme='dark';document.getElementById('colorscheme').content='dark'}}catch(e){}</script>
 <meta name="description" content="Où skier ce week-end avec ton Magic Pass : météo au sommet, ouvertures, neige, route et hébergement en un classement.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -13,13 +14,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
+  color-scheme:only light;
   --paper:#FFFFFF; --card:#F5F4F1; --ink:#141414; --mute:#565C62; --line:rgba(20,20,20,.14); --ctl:#8A8F94;
   --inv:#141414; --invfg:#FFFFFF;
   --sky:#6FA3BE; --sun:#D8B65A; --sage:#9DB3A7; --cloud:#E6DFE2; --navy:#3C5A92; --dot:rgba(237,230,218,.55);
   --warn:#9A3F1E; --warnbg:#FBE3D6; --good:#1F6B40; --goodbg:#DDF0E3;
   --r:18px;
 }
-html[data-theme="dark"]{--paper:#121314;--card:#1E1F21;--ink:#F2F1EE;--mute:#A9AEB3;--line:rgba(255,255,255,.14);--ctl:#7D8287;--inv:#F2F1EE;--invfg:#121314}
+html[data-theme="dark"]{color-scheme:dark;--paper:#121314;--card:#1E1F21;--ink:#F2F1EE;--mute:#A9AEB3;--line:rgba(255,255,255,.14);--ctl:#7D8287;--inv:#F2F1EE;--invfg:#121314}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 Inter,system-ui,sans-serif}
 a{color:inherit}
@@ -1121,7 +1123,7 @@ footer a{color:inherit}
     const dark = document.documentElement.dataset.theme !== 'dark';
     if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
     try { localStorage.setItem('sch-theme', dark ? 'dark' : 'light'); } catch (err) {}
-    $('#themecolor').setAttribute('content', dark ? '#121314' : '#FFFFFF');
+    $('#themecolor').setAttribute('content', dark ? '#121314' : '#FFFFFF'); $('#colorscheme').setAttribute('content', dark ? 'dark' : 'only light');
     toast(dark ? 'Mode sombre' : 'Mode clair');
   });
   if (document.documentElement.dataset.theme === 'dark') $('#themecolor').setAttribute('content', '#121314');
