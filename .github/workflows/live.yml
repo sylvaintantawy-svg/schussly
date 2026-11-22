@@ -1,0 +1,21 @@
+# Version hébergée (GitHub Pages / Netlify relié à GitHub) : actualise live.js et snapshot.js à 7 h et 12 h (heure suisse).
+name: Actualiser les données
+on:
+  schedule:
+    - cron: "0 6,11 * * *"   # 7 h et 12 h en hiver (UTC+1)
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: python3 update.py .
+      - run: |
+          git config user.name "schussly-bot"
+          git config user.email "bot@schussly.ch"
+          git add live.js snapshot.js
+          git commit -m "Données du $(TZ=Europe/Zurich date +'%d.%m %H:%M')" || echo "rien à publier"
+          git push

@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF" id="themecolor">
+<script>try{if(localStorage.getItem('sch-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<meta name="description" content="Où skier ce week-end avec ton Magic Pass : météo au sommet, ouvertures, neige, route et hébergement en un classement.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Schussly — où skier ce week-end</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFFFFF; --card:#F5F4F1; --ink:#141414; --mute:#565C62; --line:rgba(20,20,20,.14); --ctl:#8A8F94;
+  --inv:#141414; --invfg:#FFFFFF;
+  --sky:#6FA3BE; --sun:#D8B65A; --sage:#9DB3A7; --cloud:#E6DFE2; --navy:#3C5A92; --dot:rgba(237,230,218,.55);
+  --warn:#9A3F1E; --warnbg:#FBE3D6; --good:#1F6B40; --goodbg:#DDF0E3;
+  --r:18px;
+}
+html[data-theme="dark"]{--paper:#121314;--card:#1E1F21;--ink:#F2F1EE;--mute:#A9AEB3;--line:rgba(255,255,255,.14);--ctl:#7D8287;--inv:#F2F1EE;--invfg:#121314}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 Inter,system-ui,sans-serif}
+a{color:inherit}
+button{font:inherit;color:inherit}
+h1,h2,h3{margin:0}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 16px calc(100px + env(safe-area-inset-bottom))}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid #141414;outline-offset:2px;box-shadow:0 0 0 5px #fff;border-radius:8px}
+.num,.r b,.h b,.big,.tl time,.chip b,.score{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.themebtn .moon{display:none}
+html[data-theme="dark"] .themebtn .moon{display:block}
+html[data-theme="dark"] .themebtn .sunic{display:none}
+.top{display:flex;align-items:center;gap:10px;min-height:60px;padding:6px 0;position:sticky;top:0;background:var(--paper);z-index:5}
+.top h1{font:700 clamp(18px,5vw,21px)/1.15 Outfit,sans-serif;flex:1;min-width:0}
+.logo{display:flex;align-items:center;gap:8px;font:800 21px Outfit,sans-serif;letter-spacing:-.01em;flex:1}
+.logo i{width:22px;height:22px;border-radius:0 0 0 22px;background:var(--sun);display:block}
+.iconbtn{width:44px;height:44px;border-radius:22px;border:1.5px solid var(--ctl);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;text-decoration:none}
+.crit{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;margin:0 0 12px;padding:8px 14px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);text-decoration:none;font-size:14px;cursor:pointer}
+.crit span{flex:1;min-width:0;line-height:1.35}
+.crit b{font-weight:600}
+.crit em{font-style:normal;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* weather cards */
+.wcard{position:relative;overflow:hidden;border-radius:var(--r);padding:20px;color:#141414;isolation:isolate}
+.wcard.sun{background:var(--sky)} .wcard.cloud{background:var(--sage)} .wcard.snow{background:var(--navy);color:#fff}
+.wcard.off{background:#DAD7D0;color:#3F4449}
+.wcard::before{content:"";position:absolute;z-index:-1;pointer-events:none}
+.wcard.sun::before{width:220px;height:220px;border-radius:50%;background:var(--sun);top:-110px;right:-110px}
+.wcard.cloud::before{width:150px;height:150px;border-radius:50%;background:var(--cloud);top:-70px;right:-40px;box-shadow:-80px 30px 0 -20px var(--cloud),-20px 70px 0 -30px var(--cloud)}
+.wcard.snow::before{width:44px;height:44px;border-radius:50%;background:var(--dot);top:14px;right:18px;box-shadow:-58px 34px 0 -8px var(--dot),-8px 66px 0 -14px var(--dot),-104px -6px 0 -12px var(--dot),30px 54px 0 -6px var(--dot)}
+.wcard.compact.sun::before{width:150px;height:150px;top:-75px;right:-75px}
+.wcard.compact.cloud::before{width:110px;height:110px;top:-55px;right:-30px}
+.wcard.compact.snow::before{width:32px;height:32px;top:10px;right:14px}
+.wcard .cond,.wcard .where{position:relative;max-width:calc(100% - 64px)}
+.kicker{font-size:14px;font-weight:500}
+.cond{font:700 26px/1.15 Outfit,sans-serif;margin:2px 0 0}
+.cond small{font:500 14px Inter,sans-serif;margin-left:6px;white-space:nowrap}
+.big{font:800 112px/0.9 Outfit,sans-serif;letter-spacing:-.04em;margin:20px 0 6px;display:flex;align-items:flex-start}
+.big sup{font:700 24px Outfit,sans-serif;letter-spacing:0;margin:10px 0 0 6px}
+.compact .big{font-size:68px;margin:10px 0 2px}
+.compact .big sup{font-size:17px;margin-top:6px}
+.where{font:700 22px/1.2 Outfit,sans-serif}
+.where small{display:block;font:500 14px Inter,sans-serif;margin-top:2px}
+.rows{margin-top:14px;border-top:1px solid rgba(0,0,0,.25);border-bottom:1px solid rgba(0,0,0,.25);padding:6px 0}
+.snow .rows{border-color:rgba(255,255,255,.4)}
+.r{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:15px}
+.r svg{flex-shrink:0}
+.r span{flex:1;min-width:0}
+.r b{font-weight:600;text-align:right}
+.grid2{display:grid;grid-template-columns:1fr 1fr;column-gap:16px}
+@media (max-width:370px){.grid2{grid-template-columns:1fr}.big{font-size:92px}}
+.rank{position:absolute;top:18px;right:20px;font:700 14px Outfit,sans-serif;background:rgba(255,255,255,.85);color:#141414;border-radius:999px;padding:4px 10px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.88);color:#141414}
+.badge.warn{background:var(--warnbg);color:var(--warn)}
+.badge.good{background:var(--goodbg);color:var(--good)}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.strip div{background:rgba(255,255,255,.28);border-radius:10px;padding:6px 2px;text-align:center;font-size:12.5px;line-height:1.25}
+.snow .strip div{background:rgba(255,255,255,.14)}
+.strip b{display:block;font:700 16px Outfit,sans-serif}
+
+/* actions */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 12px;border-radius:14px;background:rgba(255,255,255,.92);color:#141414;font-weight:600;font-size:15px;text-decoration:none;border:0;cursor:pointer;text-align:center}
+.btn.dark{background:var(--inv);color:var(--invfg)}
+.wcard .btn.dark{background:#141414;color:#fff}
+.btn.ghost{background:transparent;border:1.5px solid var(--ctl);color:var(--ink)}
+.btn svg{flex-shrink:0}
+
+/* form */
+.field{margin-top:20px}
+.field>label,.field>.lbl{display:block;font-weight:600;font-size:15px;margin-bottom:8px}
+.input{width:100%;height:54px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);padding:0 16px;font:500 17px Inter,sans-serif;color:var(--ink)}
+.input[aria-invalid="true"]{border-color:var(--warn)}
+.err{color:var(--warn);font-size:14px;font-weight:500;margin-top:6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;min-width:56px;min-height:56px;padding:6px 12px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);cursor:pointer;text-align:center;line-height:1.2}
+.chip small{display:block;font-size:12.5px;color:var(--mute)}
+.chip b{font:700 19px Outfit,sans-serif}
+.chip.we{border-width:2px}
+.chip[aria-pressed="true"]{background:var(--inv);border-color:var(--inv);color:var(--invfg)}
+.chip[aria-pressed="true"] small{color:inherit;opacity:.8}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--card);border:1.5px solid var(--ctl);border-radius:14px;padding:4px;gap:4px}
+.seg button{min-height:44px;border:0;border-radius:10px;background:transparent;cursor:pointer;font-weight:600;font-size:14px;line-height:1.2;padding:4px}
+.seg button small{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--inv);color:var(--invfg)}
+.seg button[aria-pressed="true"] small{color:inherit;opacity:.8}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.seg.sm button{min-height:38px;font-size:13.5px}
+.cta{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:58px;margin-top:24px;border:0;border-radius:16px;background:var(--inv);color:var(--invfg);font:700 18px Outfit,sans-serif;cursor:pointer;text-decoration:none}
+.cta:disabled{opacity:.6}
+.sticky{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom));z-index:3;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.note{font-size:13.5px;color:var(--mute);margin-top:10px}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:48px;height:48px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);font:700 22px Outfit,sans-serif;cursor:pointer}
+.stepper output{font:700 22px Outfit,sans-serif;min-width:2ch;text-align:center}
+
+/* list */
+.daytabs{position:sticky;top:60px;z-index:4;background:var(--paper);padding:0 0 10px}
+.list{display:flex;flex-direction:column;gap:12px}
+.sec{font:700 18px Outfit,sans-serif;margin:24px 0 10px}
+.sec small{font:500 14px Inter,sans-serif;color:var(--mute);margin-left:6px}
+.summary{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;font-size:15px;border:1px solid var(--line)}
+.summary p{margin:8px 0 0}
+.counts{display:flex;gap:6px;flex-wrap:wrap}
+.counts span{font-size:13px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--paper);border:1px solid var(--line)}
+.slim{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 8px 8px 12px}
+.slim a.main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;min-height:52px;text-decoration:none}
+.slim .score{font:800 26px Outfit,sans-serif;width:44px;text-align:center;flex-shrink:0}
+.dotc{width:11px;height:11px;border-radius:50%;display:inline-block;vertical-align:-1px;margin-right:5px}
+.dotc.sun{background:var(--sun)} .dotc.cloud{background:var(--sage)} .dotc.snow{background:var(--navy)} .dotc.off{background:#B9B5AC}
+.slim .t{flex:1;min-width:0}
+.slim .t b{display:block;font-weight:600;line-height:1.25}
+.slim .t>span{font-size:13.5px;color:var(--mute)}
+.slim .mini{display:flex;gap:6px}
+.slim .mini a{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--ctl);display:flex;align-items:center;justify-content:center;text-decoration:none}
+.closedbox{background:var(--card);border-radius:var(--r);padding:4px 16px;border:1px solid var(--line);margin-top:12px}
+.closedbox summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600}
+.closedbox ul{margin:0 0 12px;padding:0;list-style:none;font-size:14px}
+.closedbox li{padding:8px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.closedbox li span:last-child{color:var(--mute);text-align:right}
+.closedbox li a{font-weight:500}
+.banner{font-size:13.5px;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 12px;display:flex;gap:10px;align-items:center}
+.banner span{flex:1}
+.banner button{background:none;border:1.5px solid var(--ctl);border-radius:10px;min-height:40px;padding:0 10px;cursor:pointer;font-weight:600;font-size:13px;color:var(--ink)}
+.empty{background:var(--card);border-radius:var(--r);padding:22px;text-align:center;border:1px solid var(--line)}
+.empty .btn{margin-top:12px}
+.cardlink{display:block;text-decoration:none;color:inherit;cursor:pointer;border-radius:12px}
+.more{width:100%;margin-top:12px}
+.acts.three{grid-template-columns:1.15fr 1fr 1fr}
+.acts.three .btn{font-size:14px;padding:0 8px;gap:5px}
+.staynote{margin:8px 0 0;font-size:13px;opacity:.85}
+.rows .r.wide{grid-column:1 / -1}
+.rnote{grid-column:1 / -1;margin:2px 0 0;font-size:12.5px;opacity:.8}
+.r span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fold{background:var(--card);border:1px solid var(--line);border-radius:16px}
+.fold summary{display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 12px;cursor:pointer;list-style:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold .score{font:800 26px Outfit,sans-serif;width:40px;text-align:center;flex-shrink:0}
+.fold .t{flex:1;min-width:0}
+.fold .t b{display:block;font-weight:600;line-height:1.25}
+.fold .t>span{font-size:13.5px;color:var(--mute)}
+.fold .chev{transition:transform .2s;flex-shrink:0}
+.fold[open] .chev{transform:rotate(90deg)}
+.foldbody{padding:0 14px 14px}
+.foldsub{margin:0;font-size:14px;color:var(--mute)}
+.foldbody .rows{border-color:var(--line)}
+.foldbody .btn{background:var(--paper);border:1.5px solid var(--ctl)}
+.foldbody .btn.dark{background:var(--inv);color:var(--invfg);border:0}
+.foldbody .staynote{color:var(--mute)}
+.live{margin-top:12px}
+.livecam{position:relative;width:100%;aspect-ratio:16/10;border:0;border-radius:14px;background:#000;display:block;margin-top:10px}
+.camph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:16/10;border-radius:14px;background:linear-gradient(160deg,#6FA3BE,#3C5A92);color:#fff;text-align:center;padding:16px;margin-top:10px}
+.camph p{margin:0;font-size:14px;color:#fff;opacity:.9}
+.courtesy{font-size:12px;color:var(--mute);margin-top:6px}
+.pros{margin:8px 0 0;padding:0;list-style:none}
+.pros li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+.pros li:first-child{border-top:0}
+.pros li svg{flex-shrink:0;margin-top:2px}
+.cons{margin-top:10px;font-size:14px;color:var(--mute)}
+
+/* station */
+.hours{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 0;padding:0;list-style:none}
+.h{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;font-size:13px;color:var(--mute)}
+.h .pic{display:block;margin:4px auto 2px}
+.strip .pic{display:block;margin:2px auto}
+.slim .pic{flex-shrink:0}
+.h b{display:block;font:700 22px Outfit,sans-serif;color:var(--ink)}
+.h .w{color:var(--warn);font-weight:600}
+.panel{background:var(--card);border-radius:var(--r);padding:16px;margin-top:12px;border:1px solid var(--line)}
+.panel h2{font:700 18px Outfit,sans-serif;margin:0 0 4px}
+.panel p{margin:0;color:var(--mute);font-size:14.5px}
+.linklist a{display:flex;align-items:center;justify-content:space-between;min-height:50px;border-top:1px solid var(--line);text-decoration:none;font-weight:500}
+.linklist h2+a{border-top:0}
+.inl{font-weight:600;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.why{font-size:14.5px;margin:6px 0 0;padding:0;list-style:none}
+.why li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.why li:first-child{border-top:0}
+.why b{white-space:nowrap}
+.ovr{margin-top:10px;background:none;border:1.5px solid var(--ctl);border-radius:12px;min-height:44px;padding:0 14px;cursor:pointer;font-weight:500;font-size:14px;color:var(--ink)}
+.undo{background:none;border:0;text-decoration:underline;cursor:pointer;font-size:13px;font-weight:600;padding:4px;color:inherit;min-height:32px}
+
+/* package */
+.tl{position:relative;margin:8px 0 0;padding:0;list-style:none}
+.tl li{position:relative;padding:0 0 14px 66px;min-height:36px}
+.tl time{position:absolute;left:0;top:0;font:700 15px Outfit,sans-serif}
+.tl li::before{content:"";position:absolute;left:52px;top:7px;width:9px;height:9px;border-radius:50%;background:var(--ink)}
+.tl li::after{content:"";position:absolute;left:56px;top:19px;bottom:0;width:1.5px;background:var(--line)}
+.tl li:last-child::after{display:none}
+.tl .dayh{padding:6px 0 8px;font:700 15px Outfit,sans-serif;color:var(--mute);min-height:0}
+.tl .dayh::first-letter{text-transform:uppercase}
+.tl .dayh::before,.tl .dayh::after{display:none}
+.tl b{font-weight:600}
+.tl small{display:block;color:var(--mute);font-size:13.5px}
+.opt{display:flex;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.opt .grow{flex:1;min-width:0}
+.opt .grow b{display:block}
+.opt .grow span{font-size:13.5px;color:var(--mute)}
+.alert{background:var(--warnbg);color:var(--warn);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:14.5px}
+.alert b{display:block}
+.alert .btn{margin-top:10px;background:#fff;color:#141414}
+.night{padding:12px 0;border-top:1px solid var(--line)}
+.panel h2+.night{border-top:0}
+
+/* nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--paper);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px;justify-content:center;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--mute);border-radius:14px}
+nav.tabs a svg{stroke:currentColor}
+nav.tabs a[aria-current="page"]{color:var(--ink);background:var(--card);box-shadow:inset 0 0 0 1.5px var(--ctl)}
+nav.tabs a[aria-current="page"] svg{stroke-width:2.4}
+footer{font-size:13px;color:var(--mute);margin-top:28px;line-height:1.6}
+footer a{color:inherit}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--inv);color:var(--invfg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+.toast.on{opacity:1}
+.skel{height:300px;border-radius:var(--r);background:linear-gradient(90deg,var(--card),var(--paper),var(--card));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+/* calendrier période */
+.cal{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cal .chip{min-width:0;width:100%}
+.cal .chip.mid{background:var(--card);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.calhint{font-size:13.5px;color:var(--mute);margin-top:8px}
+/* budget */
+.checks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.check{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);font-weight:600;font-size:14.5px;cursor:pointer;padding:0 8px}
+.check input{width:20px;height:20px;accent-color:var(--ink);margin:0}
+.check:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.range{width:100%;height:44px;accent-color:var(--ink);margin:4px 0 0}
+.rangeval{display:flex;justify-content:space-between;align-items:baseline}
+.rangeval b{font:700 26px Outfit,sans-serif}
+.rangeval span{font-size:13px;color:var(--mute)}
+.split{margin-top:10px;font-size:14px;color:var(--mute)}
+.split b{color:var(--ink)}
+.bud{display:flex;justify-content:space-between;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+.bud:first-of-type{border-top:0}
+.bud.tot{font-weight:700;border-top:1.5px solid var(--ink);margin-top:4px}
+.bud span small{display:block;font-size:12.5px;color:var(--mute);font-weight:400}
+.bud b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.resto{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.resto .grow{flex:1;min-width:0}
+.resto .grow b{display:block;font-size:15px}
+.resto .grow span{font-size:13.5px;color:var(--mute)}
+.resto .px{text-align:right;font-weight:700;white-space:nowrap;font-size:15px}
+.resto .px small{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.resto a{color:inherit}
+.rh{font:700 15px Outfit,sans-serif;margin:14px 0 2px}
+.sel{width:100%;height:54px;border-radius:14px;border:1.5px solid var(--ctl);background:var(--card);padding:0 12px;font:500 16px Inter,sans-serif;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two .input{height:50px}
+.switch{display:flex;align-items:center;gap:10px;font-size:15px;margin-top:12px;cursor:pointer}
+.switch input{width:22px;height:22px;accent-color:var(--ink)}
+.bchip{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--goodbg);color:var(--good)}
+.bchip.tag{background:var(--paper);color:var(--mute);border:1px solid var(--line)}
+.bchip.over{background:var(--warnbg);color:var(--warn)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main id="view" tabindex="-1" aria-busy="true"></main>
+</div>
+<nav class="tabs" aria-label="Navigation principale"><div>
+  <a href="#/recherche" data-tab="search"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Recherche</a>
+  <a href="#/classement" data-tab="rank"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Classement</a>
+  <a href="#/package" data-tab="pkg"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V4.5h6V7"/></svg>Mon week-end</a>
+  <a href="#/reglages" data-tab="set"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Réglages</a>
+</div></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="stations.js"></script>
+<script src="snapshot.js"></script>
+<script src="live.js"></script>
+<script src="restaurants.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const S = window.STATIONS;
+  const byId = Object.fromEntries(S.map((s, i) => [s.id, i]));
+  const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+  const ses = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} } };
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ---------- dates & formats ----------
+  const todayZ = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zurich' }).format(new Date());
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const addDays = (s, n) => { const d = new Date(s + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+  const diffDays = (a, b) => Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 864e5);
+  const dow = (s) => new Date(s + 'T12:00:00Z').getUTCDay();
+  const WD = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'], WDL = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  const MO = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const fmtDay = (s) => `${WD[dow(s)]} ${+s.slice(8)} ${MO[+s.slice(5, 7) - 1]}`;
+  const fmtDayLong = (s) => `${WDL[dow(s)]} ${+s.slice(8)} ${MO[+s.slice(5, 7) - 1]}`;
+  const hm = (min) => { min = Math.round(min); const h = Math.floor(min / 60), m = min % 60; return h ? (m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`) : `${m} min`; };
+  const clock = (min) => { min = ((Math.round(min) % 1440) + 1440) % 1440; return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`; };
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const pres = (t) => /^Les /.test(t) ? 'près des ' + t.slice(4) : /^Le /.test(t) ? 'près du ' + t.slice(3) : 'près de ' + t;
+  const consecutive = (ds) => ds.every((d, k) => k === 0 || diffDays(ds[k - 1], d) === 1);
+  const PISTES = 8 * 60 + 45, LEAVE_SKI = 16 * 60 + 30, EVE = 18 * 60 + 30;
+
+  // ---------- state ----------
+  const overrides = store.get('sch-overrides', {});
+  const saved = store.get('sch-prefs', {});
+  const st = {
+    origin: saved.origin || 'Lausanne', originDraft: null,
+    mode: ['day', 'between', 'eve'].includes(saved.mode) ? saved.mode : 'day',
+    maxDrive: saved.maxDrive || 180, travelers: saved.travelers || 2,
+    days: saved.days || [], pkgChoice: saved.pkgChoice || {},
+    avail: [], data: null, loading: false, error: null, geoError: null,
+    activeDay: null, sort: 'score', prevRoute: null, pickEnd: false,
+    budget: Object.assign({ max: 800, fuel: true, food: true, lodge: true }, saved.budget || {}),
+    set: Object.assign({ car: 'yarish', cons: 6.0, mtn: true, fuel: 2.10, lunch: 28, dinner: 45, night: 100, diet: 'all' }, saved.set || {})
+  };
+  function persist() { store.set('sch-prefs', { origin: st.origin, mode: st.mode, maxDrive: st.maxDrive, travelers: st.travelers, days: st.days, pkgChoice: st.pkgChoice, budget: st.budget, set: st.set }); }
+  // période : jours consécutifs uniquement, 7 jours max
+  const MAXDAYS = 7;
+  const rangeOf = (a, b) => { if (b < a) [a, b] = [b, a]; const out = []; for (let d = a; d <= b; d = addDays(d, 1)) out.push(d); return out; };
+  st.days = st.days.length ? rangeOf(st.days[0], st.days[st.days.length - 1]).slice(0, MAXDAYS) : [];
+
+  // ---------- voiture, carburant, budget ----------
+  // conso réelle relevée (Spritmonitor, Yaris 2015) ; +15 % montagne/froid
+  const CARS = { yaris: { l: 'Toyota Yaris 1.33 essence (2011–2016)', c: 6.0 }, yarish: { l: 'Toyota Yaris Hybride (2012–2019)', c: 4.8 }, custom: { l: 'Autre voiture (je saisis la conso)', c: null } };
+  const consNow = () => (st.set.car === 'custom' || !CARS[st.set.car] ? +st.set.cons || 6 : CARS[st.set.car].c) * (st.set.mtn ? 1.15 : 1);
+  const fuelCHF = (km) => km * consNow() / 100 * (+st.set.fuel || 2.1);
+  const chf = (x) => `${Math.round(x).toLocaleString('fr-CH')} CHF`;
+  const RESTOS = window.RESTOS || {};
+  const DIETS = [['all', 'Tout'], ['montagne', 'Cuisine de montagne'], ['gastro', 'Gastronomique'], ['vege', 'Végétarien'], ['vegan', 'Végan']];
+  const GASTRO = new Set(window.RESTO_GASTRO || []), VEGE = new Set(window.RESTO_VEGE || []);
+  const MOUNTAIN = /fondue|raclette|rösti|valais|savoyard|fromage|matouille|terroir|alpage|comtois|braserade|jurassienne|ardoise|agneau|régiona|jambon|ferme|cabane|refuge|buvette|gîte|tsébetta|illhorn/i;
+  const tagsOf = (r) => { const t = []; if (MOUNTAIN.test(r[0] + ' ' + r[4])) t.push('montagne'); if (GASTRO.has(r[0])) t.push('gastro'); if (VEGE.has(r[0])) t.push('vege'); return t; };
+  const fitsDiet = (r) => st.set.diet === 'all' || tagsOf(r).includes(st.set.diet === 'vegan' ? 'vegan' : st.set.diet);
+  const restosAll = (s, t) => (RESTOS[s.id] || []).filter((r) => !t || r[1] === t);
+  // les adresses qui collent à l'envie choisie passent devant
+  const restosOf = (s, t) => { const L = restosAll(s, t); return [...L.filter(fitsDiet), ...L.filter((r) => !fitsDiet(r))]; };
+  const mealAvg = (s, t) => { const A = restosAll(s, t), M = A.filter(fitsDiet), L = ['montagne', 'gastro'].includes(st.set.diet) && M.length ? M : A; return L.length ? L.reduce((a, r) => a + r[2], 0) / L.length : (t === 'p' ? +st.set.lunch : +st.set.dinner); };
+  const budgetOn = () => st.budget.fuel || st.budget.food || st.budget.lodge;
+  const rooms = () => Math.ceil(st.travelers / 2);
+  // coût estimé du séjour entier dans une seule station (cartes du classement)
+  function costFor(r) {
+    const n = nights(), days = st.days.length || 1;
+    const km = r.dist != null ? (st.mode === 'day' ? days * 2 * r.dist : 2 * r.dist) : null;
+    const fuel = st.budget.fuel && km != null ? fuelCHF(km) : 0;
+    const food = st.budget.food ? st.travelers * (days * mealAvg(r.s, 'p') + n * mealAvg(r.s, 'v')) : 0;
+    const lodgeEst = st.budget.lodge ? n * (+st.set.night || 100) * rooms() : 0;
+    const left = st.budget.max - fuel - food;
+    const perNight = st.budget.lodge && n ? Math.floor(left / n) : null;
+    return { km, fuel, food, lodgeEst, perNight, total: fuel + food + lodgeEst, n };
+  }
+  const nightMax = (perNight) => perNight != null && perNight >= 30 ? perNight : null;
+
+  // shared plan in the URL: #/package?d=2026-11-28,2026-11-29&s=saasfee,glacier3000&m=between&o=Lausanne&p=2
+  (function readShared() {
+    const q = location.hash.split('?')[1]; if (!q) return;
+    const p = new URLSearchParams(q);
+    if (p.get('d')) st.days = p.get('d').split(',').filter((d) => /^\d{4}-\d\d-\d\d$/.test(d)).sort();
+    if (['day', 'between', 'eve'].includes(p.get('m'))) st.mode = p.get('m');
+    if (p.get('o')) st.origin = p.get('o');
+    if (p.get('p')) st.travelers = clamp(+p.get('p') || 2, 1, 8);
+    if (p.get('s')) { const id = p.get('s').split(',')[0]; st.pkgChoice = byId[id] != null ? { all: id } : {}; }
+  })();
+
+  // ---------- data ----------
+  const tfetch = (url) => fetch(url, (window.AbortSignal && AbortSignal.timeout) ? { signal: AbortSignal.timeout(9000) } : {});
+  class GeoError extends Error {}
+  async function geocode(q) {
+    const j = await (await tfetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=fr&name=' + encodeURIComponent(q))).json();
+    if (!j.results || !j.results.length) throw new GeoError('Lieu introuvable');
+    return { name: j.results[0].name, lat: j.results[0].latitude, lon: j.results[0].longitude };
+  }
+  async function weatherAll() {
+    const P = S.map((s) => s.wx || [s.lat, s.lon]);
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${P.map((p) => p[0])}&longitude=${P.map((p) => p[1])}&elevation=${S.map((s) => s.elev)}&hourly=temperature_2m,sunshine_duration,wind_gusts_10m,snowfall,snow_depth&timezone=Europe%2FZurich&past_days=3&forecast_days=8`;
+    const j = await (await tfetch(url)).json();
+    if (!Array.isArray(j)) throw new Error(j.reason || 'Météo indisponible');
+    return j.map((x) => x.hourly);
+  }
+  async function drives(o) {
+    const coords = [`${o.lon},${o.lat}`].concat(S.map((s) => `${s.lon},${s.lat}`)).join(';');
+    const j = await (await tfetch(`https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=duration,distance`)).json();
+    if (j.code !== 'Ok') throw new Error('Routage indisponible');
+    return { dr: j.durations[0].slice(1).map((sec) => (sec == null ? null : Math.round(sec / 60 * 1.2))), dist: j.distances[0].slice(1).map((m) => (m == null ? null : Math.round(m / 1000))) };
+  }
+  function hourlyDay(h, d) {
+    const idx = []; h.time.forEach((t, i) => { if (t.startsWith(d)) { const H = +t.slice(11, 13); if (H >= 9 && H <= 16) idx.push(i); } });
+    if (idx.length < 8) return null;
+    const s0 = idx[0], sum = (a, ii) => ii.reduce((x, i) => x + (a[i] || 0), 0);
+    return {
+      sunMin: sum(h.sunshine_duration, idx) / 60, gust: Math.max(...idx.map((i) => h.wind_gusts_10m[i] || 0)),
+      snowDay: sum(h.snowfall, idx), depth: h.snow_depth[s0] || 0,
+      fresh72: sum(h.snowfall, Array.from({ length: 72 }, (_, k) => s0 - 72 + k).filter((i) => i >= 0)),
+      hours: [9, 11, 13, 15].map((H) => { const i = idx[H - 9]; return { t: H, temp: h.temperature_2m[i], sun: h.sunshine_duration[i] / 60, gust: h.wind_gusts_10m[i], snow: h.snowfall[i] }; })
+    };
+  }
+  function aggDay(a, d) {
+    const x = a && a[d]; if (!x) return null;
+    return { sunMin: x[0], gust: x[1], snowDay: x[2], depth: x[3], fresh72: x[4], hours: x[5].map(([t, temp, sun, gust, snow]) => ({ t: +t, temp, sun, gust, snow })) };
+  }
+  const wxFor = (i, d) => st.data.agg ? aggDay(st.data.agg[i], d) : (st.data.wx ? hourlyDay(st.data.wx[i], d) : null);
+  function availDates() {
+    const t = todayZ();
+    const all = st.data.agg ? Object.keys(st.data.agg[0]) : [...new Set(st.data.wx[0].time.map((x) => x.slice(0, 10)))];
+    return all.sort().filter((d) => d >= t).slice(0, 8);
+  }
+  const driveOf = (i) => st.data.dr ? st.data.dr[i] : null;
+  const distOf = (i) => st.data.dist ? st.data.dist[i] : null;
+  const roadTxt = (r) => r.drive != null ? hm(r.drive) + (r.dist != null ? ' · ' + r.dist + ' km' : '') : '–';
+  // ---------- live (remontées et pistes ouvertes, relevées 2×/jour sur magicpass.ch) ----------
+  const LIVE = window.LIVE || null;
+  const liveTime = LIVE ? LIVE.fetchedAt.slice(11, 16) : null;
+  function liveFor(s, d) {
+    if (!LIVE || LIVE.date !== d) return null;
+    const L = LIVE.stations[s.id];
+    if (!L || (!L.liftsTotal && !L.kmTotal)) return null;
+    return L;
+  }
+  const liveSkiOpen = (L) => L.open && ((L.kmOpen || 0) > 0 || (!L.kmTotal && L.liftsOpen > 0));
+  const kmTot = (s) => { const L = LIVE && LIVE.stations[s.id]; return L && L.kmTotal ? L.kmTotal : s.km; };
+  const fmtKm = (x) => (Math.round(x * 10) / 10).toLocaleString('fr-CH');
+  function hav(a, b) { const R = 6371, r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r; const x = Math.sin(dl / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }
+  const transferEst = (a, b) => Math.max(15, Math.round(hav(a, b) * 1.7 / 50 * 60 / 5) * 5); // estimation, routes de montagne
+
+  // ---------- scoring (poids sur 100) ----------
+  function openState(s, d) {
+    const o = overrides[s.id + '|' + d]; if (o) return o;
+    const L = liveFor(s, d); if (L) return liveSkiOpen(L) ? 'open' : 'closed';
+    const weekend = [0, 6].includes(dow(d));
+    if (s.status === 'open' || (s.dailyFrom && d >= s.dailyFrom)) return 'open';
+    if (s.condFrom && d >= s.condFrom && weekend) return 'maybe';
+    if (!s.dailyFrom && !s.condFrom) return 'unknown';
+    return 'closed';
+  }
+  function parts(s, w, drive, o, d) {
+    const L = liveFor(s, d), km = L ? (L.kmOpen || 0) : kmTot(s);
+    return {
+      dom: o === 'open' ? 15 + 10 * Math.min(1, km / 60) : o === 'maybe' ? 8 : 5,
+      sun: 20 * Math.min(1, w.sunMin / 420),
+      wind: 15 * clamp((90 - w.gust) / 60, 0, 1),
+      snow: 15 * Math.min(1, w.depth / 0.8) + 5 * Math.min(1, w.fresh72 / 30),
+      trip: drive == null ? 10 : 20 * clamp((240 - drive) / 180, 0, 1)
+    };
+  }
+  const rawTotal = (p) => Math.round(p.dom + p.sun + p.wind + p.snow + p.trip);
+  function total(p, o, w) { let x = rawTotal(p); if (o !== 'open' && w.depth < 0.3) x = Math.min(x, 45); return x; }
+  function theme(w) { if (!w) return 'off'; if (w.snowDay >= 2 || w.sunMin < 90) return 'snow'; return w.sunMin >= 300 ? 'sun' : 'cloud'; }
+  function condWord(w) { if (!w) return 'Pas de prévision'; if (w.snowDay >= 2) return 'Chutes de neige'; if (w.sunMin < 90) return 'Couvert'; return w.sunMin >= 300 ? 'Grand beau' : 'Voilé'; }
+  const stateTxt = { part: 'Pas ouverte tous les jours', open: 'Ouvert', maybe: 'Préouverture si neige', unknown: 'Ouverture non annoncée', closed: 'Fermé' };
+  const verdict = (x, o) => o !== 'open' ? 'À confirmer' : x >= 80 ? 'Excellent' : x >= 65 ? 'Bon plan' : x >= 50 ? 'Correct' : 'Moyen';
+
+  function evalRow(i, d) {
+    const s = S[i], o = openState(s, d), w = wxFor(i, d), drive = driveOf(i), dist = distOf(i), L = liveFor(s, d);
+    const p = w && o !== 'closed' ? parts(s, w, drive, o, d) : null;
+    return { s, i, d, o, w, drive, dist, L, p, sc: p ? total(p, o, w) : null };
+  }
+  // une seule destination pour toute la période : score = moyenne des jours (jour fermé = 0)
+  function periodRow(i) {
+    const rows = st.days.map((d) => evalRow(i, d)), f = rows[0];
+    if (rows.length === 1) return Object.assign({ rows }, f);
+    const ok = rows.filter((r) => r.sc != null), W = rows.filter((r) => r.w).map((r) => r.w);
+    const avg = (k) => W.reduce((a, w) => a + w[k], 0) / W.length;
+    const w = W.length ? { sunMin: avg('sunMin'), gust: Math.max(...W.map((x) => x.gust)), snowDay: avg('snowDay'), depth: W[0].depth, fresh72: W[0].fresh72, hours: W[0].hours } : null;
+    const o = !ok.length ? 'closed' : rows.every((r) => r.o === 'open') ? 'open' : ok.length < rows.length ? 'part' : 'maybe';
+    const sc = ok.length ? Math.round(rows.reduce((a, r) => a + (r.sc || 0), 0) / rows.length) : null;
+    return { s: f.s, i, d: f.d, o, w, drive: f.drive, dist: f.dist, L: f.L, p: ok.length ? ok[0].p : null, sc, rows };
+  }
+  const isPeriod = () => st.days.length > 1;
+  function rowsFor(d) {
+    const all = S.map((_, i) => d === 'P' ? periodRow(i) : evalRow(i, d));
+    const inRange = all.filter((r) => r.drive == null || r.drive <= st.maxDrive);
+    const key = { score: (a, b) => (b.sc ?? -1) - (a.sc ?? -1), route: (a, b) => (a.drive ?? 999) - (b.drive ?? 999), snow: (a, b) => (b.w ? b.w.depth : -1) - (a.w ? a.w.depth : -1) }[st.sort];
+    const sortF = (a, b) => key(a, b) || (b.sc ?? -1) - (a.sc ?? -1) || (a.drive ?? 999) - (b.drive ?? 999);
+    return {
+      open: inRange.filter((r) => r.sc != null && r.o === 'open').sort(sortF),
+      confirm: inRange.filter((r) => r.sc != null && r.o !== 'open').sort(sortF),
+      closed: inRange.filter((r) => r.sc == null).sort((a, b) => (a.s.condFrom || a.s.dailyFrom || '9999').localeCompare(b.s.condFrom || b.s.dailyFrom || '9999')),
+      far: all.filter((r) => r.drive != null && r.drive > st.maxDrive)
+    };
+  }
+  const byScore = (a, b) => b.sc - a.sc;
+  const bestOf = (d) => { const R = rowsFor(d || 'P'); return [...R.open].sort(byScore)[0] || [...R.confirm].sort(byScore)[0] || null; };
+
+  // ---------- format du séjour ----------
+  function modeOptions() {
+    const n = st.days.length, ok = consecutive(st.days);
+    const f = st.days[0], l = st.days[n - 1];
+    return [
+      { k: 'day', l: 'Journée', s: 'aller-retour', ok: true },
+      { k: 'between', l: n > 1 ? `${n - 1} nuit${n > 2 ? 's' : ''}` : 'Nuits', s: n > 1 && f ? `${WD[dow(f)]} → ${WD[dow(l)]}` : 'choisis 2 jours', ok: n > 1 && ok },
+      { k: 'eve', l: `${n} nuit${n > 1 ? 's' : ''}`, s: f ? `dès ${WD[dow(addDays(f, -1))]} soir` : '', ok: ok }
+    ];
+  }
+  function fixMode(silent) {
+    const o = modeOptions().find((x) => x.k === st.mode);
+    if (!o || !o.ok) { st.mode = 'day'; if (!silent) toast(consecutive(st.days) ? 'Format ajusté aux jours choisis' : 'Jours non consécutifs : format Journée'); }
+  }
+  const nights = () => st.mode === 'day' ? 0 : st.mode === 'between' ? st.days.length - 1 : st.days.length;
+  const nightBefore = (d) => ({ ci: addDays(d, -1), co: d });
+  // hébergement proposé sur les cartes et la fiche : les nuits du séjour recherché
+  function stayFor(d) {
+    const n = st.days.length, f = st.days[0], l = st.days[n - 1];
+    if (st.days.includes(d) && n > 1 && consecutive(st.days)) return { ci: st.mode === 'eve' ? addDays(f, -1) : f, co: l };
+    if (st.days.includes(d) && st.mode === 'eve' && n === 1) return { ci: addDays(d, -1), co: d };
+    return { ci: addDays(d, -1), co: d };
+  }
+  const stayShort = (ci, co) => `${WD[dow(ci)]} ${+ci.slice(8)} → ${WD[dow(co)]} ${+co.slice(8)}`;
+  // hébergement du programme : chaque nuit se passe près de la station du lendemain
+  function lodging(P) {
+    if (!nights()) return [];
+    const list = [], first = st.days[0], last = st.days[st.days.length - 1];
+    for (let n = st.mode === 'eve' ? addDays(first, -1) : first; n < last; n = addDays(n, 1)) { const nx = P.find((x) => x.d === addDays(n, 1)); list.push({ n, row: nx && nx.best }); }
+    const blocks = [];
+    list.forEach((x) => { const b = blocks[blocks.length - 1]; if (b && x.row && b.row && b.row.s.id === x.row.s.id) b.co = addDays(x.n, 1); else blocks.push({ ci: x.n, co: addDays(x.n, 1), row: x.row }); });
+    return blocks.filter((b) => b.row);
+  }
+
+  // ---------- liens ----------
+  // max = prix max par nuit pour le groupe (issu du budget), filtre appliqué sur Booking et Airbnb
+  const bookingUrl = (s, ci, co, max) => `https://www.booking.com/searchresults.fr.html?ss=${encodeURIComponent(s.town)}&checkin=${ci}&checkout=${co}&group_adults=${st.travelers}&no_rooms=${rooms()}&order=price&selected_currency=CHF${max ? `&nflt=${encodeURIComponent('price=CHF-0-' + max + '-1')}` : ''}`;
+  const airbnbUrl = (s, ci, co, max) => { const k = 0.12; return `https://www.airbnb.ch/s/${encodeURIComponent(s.town)}/homes?checkin=${ci}&checkout=${co}&adults=${st.travelers}&ne_lat=${(s.lat + k).toFixed(3)}&ne_lng=${(s.lon + k * 1.4).toFixed(3)}&sw_lat=${(s.lat - k).toFixed(3)}&sw_lng=${(s.lon - k * 1.4).toFixed(3)}&search_by_map=true${max ? `&price_filter_input_type=0&price_max=${max}&currency=CHF` : ''}`; };
+  const mapsSearch = (name, s) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + s.town)}`;
+  const mapsUrl = (s) => { const o = st.data.origin; const from = o.lat != null ? `${o.lat},${o.lon}` : encodeURIComponent(o.query || o.name); return `https://www.google.com/maps/dir/?api=1&origin=${from}&destination=${s.lat},${s.lon}&travelmode=driving`; };
+  const camUrl = (s, k = 0) => s.cams && s.cams[k] ? `https://www.windy.com/webcams/${s.cams[k]}` : `https://www.windy.com/-Webcams/webcams?${s.lat},${s.lon},13,p:cams`;
+  const nightsLabel = (ci, co) => { const n = diffDays(ci, co); return `${n} nuit${n > 1 ? 's' : ''} · ${WD[dow(ci)]} ${+ci.slice(8)} → ${WD[dow(co)]} ${+co.slice(8)}`; };
+  const NT = '<span class="sr"> (nouvel onglet)</span>';
+  const ext = (href, inner, cls = 'btn') => `<a${cls ? ` class="${cls}"` : ''} href="${href}" target="_blank" rel="noopener">${inner}${NT}</a>`;
+
+  // ---------- icônes ----------
+  const ic = (p, sz = 20, sw = 1.8) => `<svg aria-hidden="true" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    car: ic('<path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="19" r="1"/><circle cx="16.5" cy="19" r="1"/>'),
+    sun: ic('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+    cloud: ic('<path d="M7 18h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18z"/>'),
+    wind: ic('<path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8"/>'),
+    snow: ic('<path d="M12 2v20M4 7l16 10M20 7L4 17"/>'),
+    lift: ic('<path d="M3 5l18 4M12 7v5"/><rect x="8" y="12" width="8" height="7" rx="1.5"/>'),
+    flag: ic('<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>'),
+    bed: ic('<path d="M3 18V7M3 13h18v5M21 13a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="10.5" r="1.5"/>', 18, 2),
+    home: ic('<path d="M3 11l9-7 9 7v9H3z"/><path d="M10 20v-5h4v5"/>', 18, 2),
+    back: ic('<path d="M15 5l-7 7 7 7"/>', 22, 2.2),
+    share: ic('<path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6"/>', 20, 2),
+    arrow: ic('<path d="M7 17L17 7M9 7h8v8"/>', 18, 2),
+    chev: ic('<path d="M9 5l7 7-7 7"/>', 18, 2),
+    cam: ic('<rect x="3" y="7" width="13" height="11" rx="2"/><path d="M16 11l5-3v9l-5-3"/>', 18, 2)
+  };
+  const PIC = {
+    sun: '<circle cx="16" cy="16" r="6.5" fill="#F4B400"/><g stroke="#F4B400" stroke-width="2.4" stroke-linecap="round"><path d="M16 2.5v3.5M16 26v3.5M2.5 16H6M26 16h3.5M6.5 6.5l2.5 2.5M23 23l2.5 2.5M6.5 25.5L9 23M23 9l2.5-2.5"/></g>',
+    part: '<circle cx="12" cy="11" r="5.5" fill="#F4B400"/><g stroke="#F4B400" stroke-width="2.2" stroke-linecap="round"><path d="M12 1.5v2.5M3.5 11H1.5M5.5 4.5l1.6 1.6M18.5 4.5l-1.6 1.6"/></g><path d="M10 27h14.5a5 5 0 0 0 .4-10 7 7 0 0 0-13.3 2A4 4 0 0 0 10 27z" fill="#EEF1F4" stroke="#8C97A3" stroke-width="1.6" stroke-linejoin="round"/>',
+    cloud: '<path d="M8 15.5a5 5 0 0 1 9.4-2.3A4 4 0 0 1 24 16" fill="#D5DBE1" stroke="#8C97A3" stroke-width="1.5"/><path d="M7.5 27h16a5 5 0 0 0 .4-10 7 7 0 0 0-13.3 2A4 4 0 0 0 7.5 27z" fill="#C3CBD3" stroke="#7D8894" stroke-width="1.6" stroke-linejoin="round"/>',
+    snow: '<path d="M7.5 19h16a5 5 0 0 0 .4-10 7 7 0 0 0-13.3 2A4 4 0 0 0 7.5 19z" fill="#D5DBE1" stroke="#7D8894" stroke-width="1.6" stroke-linejoin="round"/><g stroke="#3B82F6" stroke-width="2" stroke-linecap="round"><path d="M10 23v6M7.4 24.5l5.2 3M7.4 27.5l5.2-3M21 23v6M18.4 24.5l5.2 3M18.4 27.5l5.2-3"/></g>'
+  };
+  const picKind = (h) => h.snow >= 0.3 ? 'snow' : h.sun >= 45 ? 'sun' : h.sun >= 15 ? 'part' : 'cloud';
+  const picDay = (w) => !w ? 'cloud' : w.snowDay >= 2 ? 'snow' : w.sunMin >= 300 ? 'sun' : w.sunMin >= 90 ? 'part' : 'cloud';
+  const picTxt = { sun: 'Soleil', part: 'Éclaircies', cloud: 'Nuageux', snow: 'Neige' };
+  const pic = (k, sz = 34) => `<svg class="pic" aria-hidden="true" width="${sz}" height="${sz}" viewBox="0 0 32 32">${PIC[k]}</svg>`;
+
+  // ---------- morceaux partagés ----------
+  function dataBanner() {
+    if (st.data.live) return `<div class="banner"><span>Prévisions mises à jour à ${esc(st.data.when)}${LIVE ? ` · pistes relevées à ${liveTime}` : ''}.</span><button type="button" data-refresh>Actualiser</button></div>`;
+    return `<div class="banner"><span>Mis à jour 2×/jour (7 h et 12 h). Météo du ${esc(st.data.when)}${LIVE ? ` · pistes relevées le ${+LIVE.date.slice(8)}.${LIVE.date.slice(5, 7)} à ${liveTime} sur magicpass.ch` : ''}.${st.data.dr ? '' : ` Routes calculées hors ligne seulement depuis : ${(st.data.cities || []).join(', ')}.`}</span></div>`;
+  }
+  function critBar() {
+    const n = st.days.length;
+    const ds = n ? (n > 1 ? `${fmtDay(st.days[0])} – ${fmtDay(st.days[n - 1])}` : fmtDay(st.days[0])) : 'aucun jour';
+    const f = st.mode === 'day' ? 'Journée' : `${nights()} nuit${nights() > 1 ? 's' : ''}`;
+    if (!st.data.dr) return `<a class="crit" href="#/recherche" style="border-color:var(--warn)"><span><b>${esc(st.data.origin.name)}</b> · km et temps de route indisponibles depuis ce départ</span><em>Choisir une ville</em></a>`;
+    return `<a class="crit" href="#/recherche"><span><b>${esc(st.data.origin.name)}</b> · ${ds} · ${f} · ≤ ${st.maxDrive >= 600 ? '∞' : hm(st.maxDrive)} · ${st.travelers} pers.${budgetOn() ? ' · budget ' + chf(st.budget.max) : ''}</span><em>Modifier</em></a>`;
+  }
+  function daySeg(d, base) {
+    if (st.days.length < 2) return '';
+    return `<div class="daytabs"><div class="seg sm" role="group" aria-label="Jour affiché">${st.days.map((x) => `<button type="button" data-day="${x}"${base ? ` data-href="${base}/${x}"` : ''} aria-pressed="${x === d}">${fmtDay(x)}</button>`).join('')}</div></div>`;
+  }
+  function ovrBadge(s, d) {
+    const k = s.id + '|' + d; if (!overrides[k]) return '';
+    return `<span class="badge" style="margin-top:8px">Statut modifié par toi <button type="button" class="undo" data-undo="${k}">annuler</button></span>`;
+  }
+  function stationCard(r, rank) {
+    const { s, w, o, sc, d } = r, th = theme(w);
+    return `<article class="wcard ${th}">
+      ${rank ? `<span class="rank" aria-hidden="true">#${rank}</span>` : `<span class="rank" aria-hidden="true">À confirmer</span>`}
+      <a class="cardlink" href="#/station/${s.id}/${d}">
+        ${rank ? `<span class="sr">Rang ${rank}. </span>` : ''}
+        <h3 class="cond">${condWord(w)}<small>${r.rows && r.rows.length > 1 ? `moyenne sur ${r.rows.length} jours` : Math.round(w.hours[2].temp) + '° à 13 h'}</small></h3>
+        <div class="big">${sc}<sup aria-hidden="true">/100</sup><span class="sr"> sur 100</span></div>
+        <div class="where">${esc(s.name)}<small>${verdict(sc, o)} · sommet ${s.top} m · ${fmtKm(kmTot(s))} km de pistes au total</small></div>
+        ${infoRows(r)}
+        ${dayStrip(r)}
+        <span class="sr">Voir la fiche.</span>
+      </a>
+      ${ovrBadge(s, d)}
+      ${cardActs(r, true)}
+    </article>`;
+  }
+  function dayStrip(r) {
+    if (r.rows && r.rows.length > 1) return `<div class="strip" aria-hidden="true">${r.rows.map((x) => `<div>${WD[dow(x.d)]} ${+x.d.slice(8)}${pic(x.sc == null ? 'cloud' : picDay(x.w), 28)}<b>${x.sc == null ? 'fermé' : x.w ? Math.round(x.w.hours[2].temp) + '°' : '–'}</b></div>`).join('')}</div>`;
+    return `<div class="strip" aria-hidden="true">${r.w.hours.map((h) => `<div>${h.t} h${pic(picKind(h), 28)}<b>${Math.round(h.temp)}°</b></div>`).join('')}</div>`;
+  }
+  function slimRow(r, rank) {
+    const { s, w, o, sc, drive, d } = r;
+    return `<details class="fold">
+      <summary>
+        <span class="score" aria-hidden="true">${sc}</span>${pic(picDay(w), 30)}
+        <span class="t"><b>${rank ? rank + '. ' : ''}${esc(s.name)}</b><span>${condWord(w)} · ${drive != null ? hm(drive) + (r.dist != null ? ' · ' + r.dist + ' km' : '') : 'route ?'}${o !== 'open' ? ' · ' + stateTxt[o].toLowerCase() : ''}</span></span>
+        <span class="sr">Score ${sc} sur 100. Déplier.</span>
+        <span class="chev" aria-hidden="true">${I.chev}</span>
+      </summary>
+      <div class="foldbody">
+        <p class="foldsub">${verdict(sc, o)} · sommet ${s.top} m · ${fmtKm(kmTot(s))} km de pistes au total</p>
+        ${infoRows(r)}
+        ${cardActs(r, true)}
+        <a class="btn ghost" style="margin-top:8px" href="#/station/${s.id}/${d}">Voir la fiche complète ${I.chev}</a>
+      </div>
+    </details>`;
+  }
+  function infoRows(r) {
+    const { s, w, d } = r, today = todayZ();
+    const Lt = LIVE && LIVE.stations[s.id] && (LIVE.stations[s.id].liftsTotal || LIVE.stations[s.id].kmTotal) ? LIVE.stations[s.id] : null;
+    const tag = '';
+    const pistes = Lt ? `${fmtKm(Lt.kmOpen || 0)} / ${fmtKm(Lt.kmTotal)} km` : '–';
+    const lifts = Lt ? `${Lt.liftsOpen} / ${Lt.liftsTotal}` : '–';
+    return `<div class="rows grid2">
+      <div class="r">${I.flag}<span>Pistes ouv.${tag}</span><b>${pistes}</b></div>
+      <div class="r">${I.lift}<span>Remontées${tag}</span><b>${lifts}</b></div>
+      <div class="r wide">${I.car}<span>Itinéraire</span><b>${r.drive != null ? hm(r.drive) + (r.dist != null ? ' · ' + r.dist + ' km' : '') : 'voir le trajet'}</b></div>
+      <div class="r">${I.snow}<span>Neige</span><b>${w ? Math.round(w.depth * 100) + ' cm' : '–'}</b></div>
+      <div class="r">${I.wind}<span>Rafales</span><b>${w ? Math.round(w.gust) + ' km/h' : '–'}</b></div>
+      ${budgetOn() ? budgetRow(r) : ''}
+      ${Lt ? `<p class="rnote">Pistes et remontées ouvertes ${d === LIVE.date ? 'à' : 'aujourd’hui à'} ${liveTime} (magicpass.ch)</p>` : ''}
+    </div>`;
+  }
+  function budgetRow(r) {
+    const c = costFor(r), over = c.total > st.budget.max;
+    const what = [st.budget.fuel ? 'essence' : '', st.budget.food ? 'repas' : '', st.budget.lodge && c.n ? 'hôtel' : ''].filter(Boolean).join(' + ');
+    return `<div class="r wide">${I.bed}<span>Coût estimé (${what || '—'})</span><b>≈ ${chf(c.total)} <span class="bchip${over ? ' over' : ''}">${over ? '+' + chf(c.total - st.budget.max) : 'dans le budget'}</span></b></div>`;
+  }
+  // nuits proposées + plafond par nuit issu du budget (seulement si le séjour recherché a des nuits)
+  function stayMax(r, ci, co) {
+    if (!st.budget.lodge || !nights() || !st.days.includes(r.d)) return null;
+    return nightMax(costFor(r).perNight);
+  }
+  function cardActs(r, dark) {
+    const { s, d } = r, { ci, co } = stayFor(d), mx = stayMax(r, ci, co);
+    return `<div class="acts three">${ext(mapsUrl(s), `${I.car} Itinéraire`, dark ? 'btn dark' : 'btn')}${ext(bookingUrl(s, ci, co, mx), `${I.bed} Booking`)}${ext(airbnbUrl(s, ci, co, mx), `${I.home} Airbnb`)}</div>
+      <p class="staynote">Hébergement proposé&nbsp;: ${nightsLabel(ci, co)} · ${st.travelers} pers. · ${pres(s.town)}${mx ? ` · ≤ ${chf(mx)}/nuit` : ''}</p>
+      ${r.sc != null && st.days.includes(d) ? (destination() && destination().s.id === s.id ? `<a class="btn ghost" style="margin-top:8px" href="#/package">Ton week-end ✓ · voir le programme</a>` : `<button type="button" class="btn${dark ? '' : ' dark'}" style="margin-top:8px;width:100%" data-choose="${s.id}">Choisir pour mon week-end</button>`) : ''}`;
+  }
+  const EMBED = !/claude\.ai|claudeusercontent|claude\.site|anthropic/.test(location.hostname) && location.protocol !== 'file:';
+  function camPanel(s) {
+    const id = s.cams && s.cams[0];
+    if (!id && !s.offCam) return '';
+    const body = EMBED && id
+      ? `<iframe class="livecam" src="https://webcams.windy.com/webcams/public/embed/player/${id}/day" title="Webcam en direct ${esc(s.name)}" loading="lazy" allowfullscreen></iframe>
+         <p class="courtesy">Webcams provided by <a href="https://www.windy.com/" target="_blank" rel="noopener">windy.com</a> — <a href="https://www.windy.com/webcams/${id}" target="_blank" rel="noopener">voir sur Windy</a></p>`
+      : `<div class="camph">${I.cam}<p>La webcam s’affiche ici dans la version en ligne de Schussly.</p>${id ? ext(camUrl(s), 'Ouvrir la webcam Windy', 'btn') : ''}</div>`;
+    return `<section class="panel live"><h2>Webcam en direct</h2><p>${s.offCam ? 'Webcam la plus proche du domaine (Windy). La webcam officielle 360° est dans « Vérifier ».' : 'Webcam la plus proche du domaine (Windy).'}</p>${body}${s.offCam ? `<div class="acts" style="grid-template-columns:1fr">${ext(s.offCam, `${I.cam} Webcam officielle 360°`, 'btn ghost')}</div>` : ''}</section>`;
+  }
+  const ok = ic('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 18, 2.4);
+  function prosPanel(r, rank, R, capped, LT) {
+    const { s, w, o, drive, d } = r, pros = [], cons = [];
+    const others = [...R.open].sort(byScore).filter((x) => x.s.id !== s.id);
+    if (w.sunMin >= 360) pros.push(`Grand soleil toute la journée&nbsp;: ${hm(w.sunMin)} de soleil entre 9 h et 16 h.`);
+    else if (w.sunMin >= 180) pros.push(`Du soleil une bonne partie de la journée (${hm(w.sunMin)}).`);
+    if (w.gust < 40) pros.push(`Vent calme (rafales max ${Math.round(w.gust)} km/h)&nbsp;: les remontées du haut devraient tourner.`);
+    else if (w.gust < 60) pros.push(`Vent modéré (rafales ${Math.round(w.gust)} km/h).`);
+    else cons.push(`Rafales fortes jusqu’à ${Math.round(w.gust)} km/h&nbsp;: risque de fermeture des remontées sommitales.`);
+    if (w.depth >= 0.5) pros.push(`Bonne base de neige au sommet&nbsp;: ${Math.round(w.depth * 100)} cm${w.fresh72 >= 8 ? `, dont ${Math.round(w.fresh72)} cm de fraîche ces 3 derniers jours` : ''}.`);
+    else if (w.fresh72 >= 10) pros.push(`${Math.round(w.fresh72)} cm de neige fraîche ces 3 derniers jours.`);
+    else if (w.depth < 0.3) cons.push(`Peu de neige au sommet (${Math.round(w.depth * 100)} cm).`);
+    if (LT && (LT.kmOpen || 0) > 0) pros.push(`${fmtKm(LT.kmOpen)} km de pistes et ${LT.liftsOpen} remontées ouverts ${d === LIVE.date ? 'en ce moment' : 'aujourd’hui'} (sur ${fmtKm(LT.kmTotal)} km).`);
+    else if (o === 'open' && kmTot(s) >= 60) pros.push(`Grand domaine&nbsp;: ${fmtKm(kmTot(s))} km de pistes au total.`);
+    if (s.top >= 2800) pros.push(`Sommet à ${s.top} m&nbsp;: neige fiable même en début de saison.`);
+    if (drive != null && drive <= 90) pros.push(`Proche&nbsp;: ${hm(drive)} de route${r.dist != null ? ' (' + r.dist + ' km)' : ''} depuis ${esc(st.data.origin.name)}.`);
+    else if (drive != null && drive > 150) cons.push(`${hm(drive)} de route&nbsp;: pense à dormir sur place.`);
+    if (o !== 'open') cons.push('Ouverture à confirmer le matin même sur le site de la station.');
+    if (capped) cons.push('Classement prudent tant que l’ouverture n’est pas confirmée.');
+    if (rank === 1 && others[0]) pros.push(`Meilleur compromis du jour, devant ${esc(others[0].s.name)}${others[0].drive != null && drive != null && others[0].drive < drive ? ` (plus proche de ${hm(drive - others[0].drive)}, mais moins bien placée)` : ''}.`);
+    const title = rank ? (rank === 1 ? 'Pourquoi n°1' : `Pourquoi n°${rank}`) : 'Ses atouts';
+    return `<section class="panel"><h2>${title}</h2><ul class="pros">${pros.map((t) => `<li>${ok}<span>${t}</span></li>`).join('')}</ul>${cons.length ? `<p class="cons"><b>À savoir&nbsp;:</b> ${cons.join(' ')}</p>` : ''}</section>`;
+  }
+  const openingTxt = (s) => [s.condFrom ? 'préouv. ' + fmtDay(s.condFrom) : '', s.dailyFrom ? 'saison ' + fmtDay(s.dailyFrom) : ''].filter(Boolean).join(' · ') || 'date non annoncée';
+
+  // ---------- écrans ----------
+  const THEMEBTN = `<button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>`;
+  // découpe du budget pour la station n°1 du premier jour (aperçu dans Recherche)
+  function splitPreview() {
+    if (!budgetOn() || !st.data) return '';
+    const b = st.days[0] && bestOf('P');
+    if (!b) return '';
+    const c = costFor(b), parts = [];
+    if (st.budget.fuel) parts.push(`essence <b>${c.km != null ? chf(c.fuel) : '?'}</b>`);
+    if (st.budget.food) parts.push(`repas <b>${chf(c.food)}</b>`);
+    if (st.budget.lodge && c.n) parts.push(c.perNight != null && c.perNight > 0 ? `hôtel <b>≤ ${chf(c.perNight)}/nuit</b>` : `<b style="color:var(--warn)">plus rien pour l’hôtel</b>`);
+    return `<p class="split">Ex. ${esc(b.s.name)}&nbsp;: ${parts.join(' · ')}${st.budget.lodge && c.n ? ` → filtre Booking et Airbnb` : ''}.</p>`;
+  }
+  function viewSearch() {
+    const opts = modeOptions();
+    const drivesOpt = [[90, '1 h 30'], [120, '2 h'], [180, '3 h'], [600, 'Illimité']];
+    const n = st.days.length, f = st.days[0], l = st.days[n - 1];
+    const hint = st.pickEnd ? `Début&nbsp;: ${fmtDay(f)} · touche le dernier jour (7 jours max)` : n > 1 ? `${n} jours · ${fmtDay(f)} → ${fmtDay(l)} · touche un jour pour recommencer` : `${fmtDay(f)} · touche un autre jour pour une période`;
+    const B = st.budget;
+    return `
+      <header class="top"><div class="logo"><i aria-hidden="true"></i>Schussly</div>${THEMEBTN}</header>
+      <section class="wcard sun">
+        <p class="kicker" style="margin:0">Ton pass, ton week-end</p>
+        <h1 class="cond" style="font-size:32px">Où skier<br>ce week-end&#8239;?</h1>
+        <p style="margin:12px 0 0;font-size:15px;max-width:78%">On compare ${S.length} stations Magic Pass autour de Lausanne&nbsp;: météo au sommet, neige, ouvertures, route et budget.</p>
+      </section>
+      <form id="f" novalidate>
+        <div class="field"><label for="origin">Je pars de</label><input class="input" id="origin" list="cities" value="${esc(st.originDraft ?? st.origin)}" autocomplete="address-level2" enterkeyhint="search"${st.geoError ? ' aria-invalid="true" aria-describedby="oerr"' : ''}>${st.geoError ? `<div class="err" id="oerr">${esc(st.geoError)}</div>` : ''}</div>
+        <datalist id="cities">${(st.data && st.data.cities ? st.data.cities : []).map((c) => `<option value="${esc(c)}">`).join('')}</datalist>
+        ${st.data && !st.data.live && !st.data.dr ? `<div class="alert" role="note" style="margin-top:10px"><b>Départ non reconnu hors ligne.</b>Choisis la ville la plus proche pour avoir les km et les temps de route&nbsp;:<div class="chips" style="margin-top:8px">${(st.data.cities || []).map((c) => `<button type="button" class="chip" data-city="${esc(c)}" style="min-height:44px">${esc(c)}</button>`).join('')}</div></div>` : ''}
+        <div class="field"><span class="lbl" id="lblDays">Période</span><div class="cal" role="group" aria-labelledby="lblDays" aria-describedby="calhint" id="days">${st.avail.map((d) => { const inR = st.days.includes(d), edge = d === f || d === l; return `<button type="button" class="chip${[0, 6].includes(dow(d)) ? ' we' : ''}${inR && !edge ? ' mid' : ''}" data-d="${d}" aria-pressed="${inR && edge}" aria-label="${fmtDayLong(d)}${inR ? ' (dans la période)' : ''}"><small aria-hidden="true">${WD[dow(d)]}</small><b aria-hidden="true">${+d.slice(8)}</b></button>`; }).join('')}</div><p class="calhint" id="calhint" aria-live="polite">${hint}</p></div>
+        <div class="field"><span class="lbl" id="lblMode">Format</span><div class="seg" role="group" aria-labelledby="lblMode" id="modes">${opts.map((o) => `<button type="button" data-m="${o.k}" aria-pressed="${st.mode === o.k}"${o.ok ? '' : ' disabled'}>${o.l}<small>${o.s}</small></button>`).join('')}</div></div>
+        <div class="field"><span class="lbl" id="lblDrive">Route maximum (aller)</span><div class="seg" role="group" aria-labelledby="lblDrive" id="drv">${drivesOpt.map(([v, lb]) => `<button type="button" data-v="${v}" aria-pressed="${st.maxDrive === v}">${lb}</button>`).join('')}</div></div>
+        <div class="field"><span class="lbl" id="lblPax">Voyageurs</span><div class="stepper" role="group" aria-labelledby="lblPax"><button type="button" data-pax="-1" aria-label="Un voyageur de moins">−</button><output id="pax" aria-live="polite">${st.travelers}</output><button type="button" data-pax="1" aria-label="Un voyageur de plus">+</button></div></div>
+        <div class="field"><span class="lbl" id="lblBud">Budget du groupe</span>
+          <div class="checks" role="group" aria-labelledby="lblBud">
+            <label class="check"><input type="checkbox" data-bud="fuel"${B.fuel ? ' checked' : ''}>Essence</label>
+            <label class="check"><input type="checkbox" data-bud="food"${B.food ? ' checked' : ''}>Restaurant</label>
+            <label class="check"><input type="checkbox" data-bud="lodge"${B.lodge ? ' checked' : ''}>Hôtel</label>
+          </div>
+          <div class="rangeval" style="margin-top:14px"><b id="budv">${chf(B.max)}</b><span>max · pour ${st.travelers} pers.</span></div>
+          <input class="range" type="range" id="bud" min="100" max="3000" step="50" value="${B.max}" aria-label="Budget maximum du groupe en francs"${budgetOn() ? '' : ' disabled'}>
+          <div id="split">${splitPreview()}</div>
+        </div>
+        <button class="cta" type="submit"${st.loading ? ' disabled' : ''}>${st.loading ? 'Analyse des stations…' : 'Voir le classement'}</button>
+        <p class="note">Scores et coûts indicatifs&nbsp;: confirme l’ouverture sur le site de la station le matin même. Voiture et prix des repas dans <a href="#/reglages">Réglages</a>.</p>
+      </form>
+      <footer>
+        Météo&nbsp;: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (modèles MeteoSwiss inclus), calculée au sommet. Route&nbsp;: <a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM</a> / OpenStreetMap, +20&nbsp;% pour la montagne.
+        Ouvertures&nbsp;: <a href="https://www.magicpass.ch/fr/stations/opening" target="_blank" rel="noopener">magicpass.ch</a> et sites des stations.
+      </footer>`;
+  }
+  function bindSearch() {
+    const inp = $('#origin');
+    inp.addEventListener('input', () => { st.originDraft = inp.value; });
+    $$('[data-city]').forEach((b) => b.addEventListener('click', async () => { await load(b.dataset.city); st.originDraft = null; persist(); go('#/classement'); }));
+    $('#days').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-d]'); if (!b) return; const d = b.dataset.d;
+      if (st.pickEnd && st.days.length === 1 && d !== st.days[0]) {
+        let r = rangeOf(st.days[0], d);
+        if (r.length > MAXDAYS) { r = d > st.days[0] ? r.slice(0, MAXDAYS) : r.slice(-MAXDAYS); toast('7 jours maximum'); }
+        st.days = r; st.pickEnd = false;
+      } else { st.days = [d]; st.pickEnd = true; }
+      fixMode(true); persist(); show({ focus: `[data-d="${d}"]`, keepScroll: true });
+    });
+    $('#modes').addEventListener('click', (e) => { const b = e.target.closest('[data-m]'); if (!b || b.disabled) return; st.mode = b.dataset.m; persist(); show({ focus: `[data-m="${st.mode}"]`, keepScroll: true }); });
+    $('#drv').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; st.maxDrive = +b.dataset.v; persist(); show({ focus: `[data-v="${st.maxDrive}"]`, keepScroll: true }); });
+    $$('[data-pax]').forEach((b) => b.addEventListener('click', () => { st.travelers = clamp(st.travelers + +b.dataset.pax, 1, 8); persist(); show({ focus: `[data-pax="${b.dataset.pax}"]`, keepScroll: true }); }));
+    $$('[data-bud]').forEach((c) => c.addEventListener('change', () => { st.budget[c.dataset.bud] = c.checked; persist(); show({ focus: `[data-bud="${c.dataset.bud}"]`, keepScroll: true }); }));
+    const rg = $('#bud');
+    rg.addEventListener('input', () => { st.budget.max = +rg.value; $('#budv').textContent = chf(st.budget.max); $('#split').innerHTML = splitPreview(); });
+    rg.addEventListener('change', persist);
+    $('#f').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      st.pickEnd = false;
+      const q = (st.originDraft ?? st.origin).trim() || 'Lausanne';
+      if (q !== st.origin || st.geoError) { const ok = await load(q); if (!ok) return; }
+      st.originDraft = null; st.activeDay = st.days[0]; go('#/classement');
+    });
+  }
+
+  // ---------- réglages ----------
+  function viewSettings() {
+    const T = st.set, c = consNow();
+    return `
+      <header class="top"><h1>Réglages</h1>${THEMEBTN}</header>
+      <section class="panel">
+        <h2>Ma voiture</h2>
+        <p>Sert à calculer l’essence aller-retour.</p>
+        <div class="field" style="margin-top:12px"><label for="car">Modèle</label><select class="sel" id="car">${Object.entries(CARS).map(([k, v]) => `<option value="${k}"${T.car === k ? ' selected' : ''}>${esc(v.l)}${v.c ? ` · ${v.c.toLocaleString('fr-CH')} l/100` : ''}</option>`).join('')}</select></div>
+        ${T.car === 'custom' ? `<div class="field" style="margin-top:12px"><label for="cons">Consommation (l/100 km)</label><input class="input" id="cons" type="number" inputmode="decimal" min="2" max="20" step="0.1" value="${T.cons}"></div>` : ''}
+        <label class="switch"><input type="checkbox" id="mtn"${T.mtn ? ' checked' : ''}>+15&nbsp;% en montagne et par le froid</label>
+        <div class="field" style="margin-top:12px"><label for="fuel">Prix de l’essence (CHF/l)</label><input class="input" id="fuel" type="number" inputmode="decimal" min="1" max="4" step="0.01" value="${(+T.fuel).toFixed(2)}"></div>
+        <p class="note">Consommation retenue&nbsp;: <b>${c.toLocaleString('fr-CH', { maximumFractionDigits: 1 })} l/100 km</b> · 100 km ≈ ${chf(fuelCHF(100))}. Conso réelle moyenne relevée par les conducteurs sur <a href="https://www.spritmonitor.de/" target="_blank" rel="noopener">Spritmonitor</a> (Yaris 1.33 ≈ 6,0 l, Yaris Hybride ≈ 4,8 l). Prix moyen du sans-plomb 95 en Suisse&nbsp;: <a href="https://www.tcs.ch/" target="_blank" rel="noopener">TCS</a> (2,10 CHF/l).</p>
+      </section>
+      <section class="panel">
+        <h2>Repas et nuit</h2>
+        <p>Prix par personne quand la station n’a pas de restaurant référencé.</p>
+        <div class="two" style="margin-top:12px">
+          <div><label class="lbl" for="lunch" style="font-weight:600;font-size:14px">Midi sur les pistes</label><input class="input" id="lunch" type="number" inputmode="numeric" min="5" max="150" step="1" value="${T.lunch}"></div>
+          <div><label class="lbl" for="dinner" style="font-weight:600;font-size:14px">Soir au village</label><input class="input" id="dinner" type="number" inputmode="numeric" min="5" max="200" step="1" value="${T.dinner}"></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label for="night">Nuit estimée (CHF par chambre de 2)</label><input class="input" id="night" type="number" inputmode="numeric" min="20" max="600" step="5" value="${T.night}"></div>
+      </section>
+      <section class="panel">
+        <h2>Mes envies de repas</h2>
+        <p>Les restaurants qui correspondent passent en tête et sont marqués. En montagne ou gastronomique, leur prix sert au budget repas.</p>
+        <div class="chips" role="group" aria-label="Type de cuisine" id="diet" style="margin-top:12px;flex-wrap:wrap">${DIETS.map(([k, l]) => `<button type="button" class="chip" style="min-height:44px" data-diet="${k}" aria-pressed="${T.diet === k}">${l}</button>`).join('')}</div>
+        ${['vege', 'vegan'].includes(T.diet) ? `<p class="note">Les offices du tourisme précisent rarement les options ${T.diet === 'vegan' ? 'véganes' : 'végétariennes'}&nbsp;: elles ne sont confirmées que quand la carte officielle le dit (ex. Plan-Francey au Moléson). Sinon, un lien de recherche autour de la station est proposé.</p>` : ''}
+      </section>
+      <section class="panel">
+        <h2>Départ par défaut</h2>
+        <p>${esc(st.origin)} · <a href="#/recherche">changer dans Recherche</a></p>
+      </section>
+      <section class="panel">
+        <h2>Affichage</h2>
+        <p>Mode clair ou sombre&nbsp;: bouton en haut à droite de chaque écran.</p>
+      </section>
+      <button type="button" class="btn ghost more" data-reset>Remettre les réglages par défaut</button>
+      <button type="button" class="btn ghost more" data-wipe>Redémarrer l’app (efface dates, choix et réglages)</button>`;
+  }
+  function bindSettings() {
+    const num = (id, k, lo, hi) => { const el = $('#' + id); if (!el) return; el.addEventListener('change', () => { const v = parseFloat(String(el.value).replace(',', '.')); if (isFinite(v)) { st.set[k] = clamp(v, lo, hi); persist(); show({ keepScroll: true, focus: '#' + id }); } }); };
+    $('#diet').addEventListener('click', (e) => { const b = e.target.closest('[data-diet]'); if (!b) return; st.set.diet = b.dataset.diet; persist(); show({ keepScroll: true, focus: `[data-diet="${st.set.diet}"]` }); });
+    $('#car').addEventListener('change', (e) => { st.set.car = e.target.value; persist(); toast('Voiture enregistrée'); show({ keepScroll: true, focus: '#car' }); });
+    $('#mtn').addEventListener('change', (e) => { st.set.mtn = e.target.checked; persist(); show({ keepScroll: true, focus: '#mtn' }); });
+    num('cons', 'cons', 2, 20); num('fuel', 'fuel', 1, 4); num('lunch', 'lunch', 5, 150); num('dinner', 'dinner', 5, 200); num('night', 'night', 20, 600);
+    $('[data-wipe]').addEventListener('click', () => { try { ['sch-prefs', 'sch-overrides'].forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); } catch (e) {} location.hash = '#/recherche'; location.reload(); });
+    $('[data-reset]').addEventListener('click', () => { st.set = { car: 'yarish', cons: 6.0, mtn: true, fuel: 2.10, lunch: 28, dinner: 45, night: 100, diet: 'all' }; persist(); toast('Réglages par défaut'); show(); });
+  }
+
+  // ---------- restaurants ----------
+  function restoPanel(stations, cap) {
+    const uniq = stations.filter((s, k) => stations.findIndex((x) => x.id === s.id) === k);
+    const any = uniq.some((s) => restosOf(s).length);
+    const TL = { montagne: 'cuisine de montagne', gastro: 'gastronomique', vege: 'option végé confirmée' };
+    const item = (s, r) => { const fits = cap == null || r[2] <= cap, tg = tagsOf(r), hit = st.set.diet !== 'all' && fitsDiet(r); return `<div class="resto"><div class="grow"><b>${ext(mapsSearch(r[0], s), esc(r[0]), '')}</b><span>${esc(r[4])}</span>${tg.length ? `<br>${tg.map((t) => `<span class="bchip${hit && t === st.set.diet ? '' : ' tag'}">${TL[t]}</span>`).join(' ')}` : ''}</div><div class="px">≈ ${r[2]} CHF<small>${r[3] === 'carte' ? 'carte officielle' : 'estimation'} · /pers.</small>${cap != null ? `<span class="bchip${fits ? '' : ' over'}">${fits ? 'dans le budget' : 'au-dessus'}</span>` : ''}</div></div>`; };
+    const block = (s) => {
+      const P = restosOf(s, 'p'), V = restosOf(s, 'v');
+      const vq = st.set.diet === 'vegan' ? 'restaurant végane' : 'restaurant végétarien';
+      const veg = ['vege', 'vegan'].includes(st.set.diet) && !restosAll(s).some(fitsDiet) ? `<p style="margin-top:8px">Option ${st.set.diet === 'vegan' ? 'végane' : 'végé'} non confirmée ici&nbsp;: ${ext(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(vq + ' ' + s.town)}`, `chercher ${pres(s.town)} ${I.arrow}`, 'inl')}</p>` : '';
+      return `${uniq.length > 1 ? `<h3 class="rh">${esc(s.name)}</h3>` : ''}${veg}${P.length ? `<p style="margin-top:8px"><b>Midi sur les pistes</b></p>${P.map((r) => item(s, r)).join('')}` : ''}${V.length ? `<p style="margin-top:8px"><b>Soir au village</b></p>${V.map((r) => item(s, r)).join('')}` : nights() ? `<p style="margin-top:8px">Soir&nbsp;: pas de restaurant référencé ${pres(s.town)}, compté ${chf(st.set.dinner)}/pers.</p>` : ''}`;
+    };
+    if (!any) return '';
+    return `<section class="panel"><h2>Où manger</h2><p>Restaurants recommandés par les stations et offices du tourisme. Prix moyen d’un repas (plat + boisson) par personne${cap != null ? ` · ton budget repas ≈ ${chf(cap)} par personne` : ''}.</p>${uniq.map(block).join('')}</section>`;
+  }
+
+  function viewRank() {
+    const per = isPeriod(), d = per ? 'P' : st.days[0]; st.activeDay = st.days[0];
+    const R = rowsFor(d), n = st.days.length;
+    const title = per ? `${fmtDay(st.days[0])} → ${fmtDay(st.days[n - 1])}` : fmtDay(d);
+    const best = [...R.open].sort(byScore)[0], nearest = [...R.open].sort((a, b) => (a.drive ?? 999) - (b.drive ?? 999))[0];
+    const sorts = [['score', 'Meilleur score'], ['route', 'Plus proche'], ['snow', 'Plus de neige']];
+    const openHtml = R.open.map((r, k) => k < 3 ? stationCard(r, k + 1) : slimRow(r, k + 1)).join('');
+    return `
+      <header class="top"><h1>Classement · ${title}</h1><button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button></header>
+      ${critBar()}
+      ${per ? `<p class="note" style="margin-top:0">Une seule station pour les ${n} jours&nbsp;: score moyen sur la période (un jour fermé compte 0).</p>` : ''}
+      ${dataBanner()}
+      <section class="summary" aria-label="Résumé du jour">
+        <div class="counts"><span>${R.open.length} ouverte${R.open.length > 1 ? 's' : ''}</span><span>${R.confirm.length} à confirmer</span><span>${R.closed.length} fermée${R.closed.length > 1 ? 's' : ''}</span></div>
+        ${LIVE && (LIVE.date === d || (per && st.days.includes(LIVE.date))) ? `<p style="margin-top:8px">Ouvertures en direct (magicpass.ch, ${liveTime}).</p>` : d > todayZ() ? `<p style="margin-top:8px">Ouvertures selon le calendrier des stations&nbsp;; l’état réel s’affiche le jour même.</p>` : ''}
+        ${best ? `<p><b>Meilleur choix&nbsp;: ${esc(best.s.name)}</b> (${best.sc}/100${best.drive != null ? ', ' + hm(best.drive) : ''}).${nearest && nearest !== best && nearest.drive != null ? ` Plus proche ouverte&nbsp;: ${esc(nearest.s.name)} (${nearest.sc}/100, ${hm(nearest.drive)}).` : ''}</p>` : '<p>Aucune station confirmée ouverte ce jour dans ce rayon.</p>'}
+      </section>
+      <div class="seg sm" role="group" aria-label="Trier par" id="sort">${sorts.map(([k, l]) => `<button type="button" data-sort="${k}" aria-pressed="${st.sort === k}">${l}</button>`).join('')}</div>
+      <h2 class="sec">${per ? 'Ouvertes tous les jours' : 'Ouvertes'}<small>${R.open.length}</small></h2>
+      <div class="list">${openHtml || '<div class="empty">Aucune station ouverte dans ce rayon.</div>'}</div>
+      ${R.confirm.length ? `<h2 class="sec">À confirmer<small>${per ? 'pas ouvertes tous les jours ou préouverture' : 'préouverture ou date non annoncée'}</small></h2><div class="list">${R.confirm.map((r, k) => k < 3 - Math.min(3, R.open.length) ? stationCard(r, 0) : slimRow(r)).join('')}</div>` : ''}
+      ${R.far.length ? `<button type="button" class="btn ghost more" data-widen>${R.far.length} station${R.far.length > 1 ? 's' : ''} au-delà de ${hm(st.maxDrive)} · afficher</button>` : ''}
+      ${R.closed.length ? `<details class="closedbox"><summary>${R.closed.length} station${R.closed.length > 1 ? 's' : ''} fermée${R.closed.length > 1 ? 's' : ''} ${per ? 'sur toute la période' : 'ce jour'}</summary><ul>${R.closed.map((r) => `<li><a href="#/station/${r.s.id}/${r.d}">${esc(r.s.name)}</a><span>${r.L ? 'fermé à ' + liveTime + ' · ' + r.L.liftsOpen + '/' + r.L.liftsTotal + ' remontées' : openingTxt(r.s)}</span></li>`).join('')}</ul></details>` : ''}
+      <a class="cta" href="#/package">Voir mon week-end ${I.chev}</a>`;
+  }
+  function bindCommon() {
+    $$('[data-choose]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); st.pkgChoice = { all: b.dataset.choose }; persist(); toast('Destination de ton week-end'); go('#/package'); }));
+    $$('[data-day]').forEach((b) => b.addEventListener('click', () => { st.activeDay = b.dataset.day; if (b.dataset.href) go(b.dataset.href, true); else show({ focus: `[data-day="${b.dataset.day}"]` }); }));
+    $$('[data-undo]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); delete overrides[b.dataset.undo]; store.set('sch-overrides', overrides); toast('Statut d’origine rétabli'); show({ keepScroll: true }); }));
+    $$('[data-refresh]').forEach((b) => b.addEventListener('click', async () => { await load(st.origin); toast(st.data.live ? 'Prévisions actualisées' : 'Hors ligne : données de démo'); }));
+  }
+  function bindRank() {
+    bindCommon();
+    $('#sort').addEventListener('click', (e) => { const b = e.target.closest('[data-sort]'); if (!b) return; st.sort = b.dataset.sort; show({ focus: `[data-sort="${st.sort}"]`, keepScroll: true }); });
+    const w = $('[data-widen]'); if (w) w.addEventListener('click', () => { st.maxDrive = 600; persist(); toast('Route maximum : illimitée'); show({ keepScroll: true }); });
+  }
+
+  function viewStation(id, d) {
+    const i = byId[id]; if (i == null) return null;
+    const r = evalRow(i, d), { s, w, o, sc, drive, p, L } = r;
+    const LT = LIVE && LIVE.stations[s.id] && (LIVE.stations[s.id].liftsTotal || LIVE.stations[s.id].kmTotal) ? LIVE.stations[s.id] : null;
+    const R = rowsFor(d), rank = R.open.findIndex((x) => x.s.id === id) + 1;
+    const th = sc == null ? 'off' : theme(w);
+    const { ci, co } = stayFor(d);
+    const leave = drive != null ? PISTES - drive - 20 : null;
+    document.title = s.name + ' · Schussly';
+    const head = `<header class="top"><button type="button" class="iconbtn" data-back aria-label="Retour">${I.back}</button><h1>${esc(s.name)}</h1><button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button></header>${daySeg(d, '#/station/' + id)}`;
+    if (o === 'closed') {
+      const od = s.condFrom && s.condFrom > d ? s.condFrom : s.dailyFrom;
+      const Lc = liveFor(s, d);
+      return `${head}
+        <article class="wcard off">
+          <p class="kicker" style="margin:0">${fmtDayLong(d)} · ${esc(s.area)}</p>
+          <h2 class="cond">Fermé ce jour</h2>
+          ${Lc ? `<p style="margin:6px 0 0;font-size:14.5px">Relevé à ${liveTime} sur magicpass.ch&nbsp;: ${Lc.liftsOpen}/${Lc.liftsTotal} remontées, ${fmtKm(Lc.kmOpen || 0)}/${fmtKm(Lc.kmTotal)} km de pistes${Lc.open && !(Lc.kmOpen > 0) ? ' (remontées piétons seulement)' : ''}.</p>` : ''}
+          ${Lc && (!od || od <= d) ? `<div class="where" style="margin-top:16px">Peut rouvrir dès que le vent ou la neige le permettent</div>` : od && od > d ? `<div class="big">${+od.slice(8)}<sup>${MO[+od.slice(5, 7) - 1]}</sup></div><div class="where">Ouverture<small>${openingTxt(s)}</small></div>` : `<div class="where" style="margin-top:16px">Ouverture non annoncée</div>`}
+          ${ovrBadge(s, d)}
+        </article>
+        <section class="panel linklist"><h2>Vérifier</h2>${ext(s.openUrl, `État des pistes (site officiel) ${I.arrow}`, '')}${s.phone ? `<a href="tel:${s.phone.replace(/\s/g, '')}">Info remontées · ${esc(s.phone)} ${I.chev}</a>` : ''}
+        <button type="button" class="ovr" data-ovr="${s.id}|${d}|open">Je sais qu’elle est ouverte ce jour</button></section>
+        <a class="cta" href="#/classement">Voir les stations ouvertes</a>`;
+    }
+    const capped = p && sc < rawTotal(p);
+    const dd = destination(), chosen = st.days.includes(d) && dd && dd.s.id === s.id, forTxt = isPeriod() && st.days.includes(d) ? 'la période' : fmtDay(d);
+    return `${head}
+      <article class="wcard ${th}">
+        ${rank ? `<span class="rank">#${rank} ce jour</span>` : ''}
+        <p class="kicker" style="margin:0">${fmtDayLong(d)} · ${esc(s.area)}</p>
+        <h2 class="cond">${condWord(w)}${w ? `<small>${Math.round(w.hours[2].temp)}° à 13 h</small>` : ''}</h2>
+        <div class="big">${sc ?? '–'}<sup aria-hidden="true">/100</sup><span class="sr"> sur 100</span></div>
+        <div class="where">${sc != null ? verdict(sc, o) : 'Non classée'}<small>${s.base}–${s.top} m · ${(LIVE && LIVE.stations[s.id] && LIVE.stations[s.id].liftsTotal) || s.lifts} remontées · ${fmtKm(kmTot(s))} km</small></div>
+        ${o !== 'open' ? `<span class="badge warn" style="margin-top:8px">${stateTxt[o]}</span> ` : ''}${ovrBadge(s, d)}
+        <div class="rows">
+          ${LT ? `<div class="r">${I.flag}<span>Pistes ouvertes ${d === LIVE.date ? '(' + liveTime + ')' : '(aujourd’hui ' + liveTime + ')'}</span><b>${fmtKm(LT.kmOpen || 0)} / ${fmtKm(LT.kmTotal)} km</b></div>
+          <div class="r">${I.lift}<span>Remontées ouvertes${d === LIVE.date ? '' : ' (auj.)'}</span><b>${LT.liftsOpen} / ${LT.liftsTotal}</b></div>` : ''}
+          <div class="r">${I.car}<span>Itinéraire depuis ${esc(st.data.origin.name)}</span><b>${drive != null ? roadTxt(r) : 'voir le trajet'}</b></div>
+          ${leave != null ? `<div class="r">${I.lift}<span>Partir à (pistes vers 8 h 45)</span><b>${clock(leave)}</b></div>` : ''}
+          ${w ? `<div class="r">${I.sun}<span>Soleil 9 h–16 h</span><b>${hm(w.sunMin)}</b></div>
+          <div class="r">${I.wind}<span>Rafales max</span><b>${Math.round(w.gust)} km/h</b></div>
+          <div class="r">${I.snow}<span>Neige au sommet (modèle)</span><b>${Math.round(w.depth * 100)} cm</b></div>
+          <div class="r">${I.snow}<span>Neige fraîche 72 h</span><b>+${Math.round(w.fresh72)} cm</b></div>` : ''}
+        </div>
+        <div class="acts">${ext(mapsUrl(s), `${I.car} Itinéraire`, 'btn dark')}${ext(camUrl(s), `${I.cam} Webcam`)}</div>
+      </article>
+      ${w ? `<section class="panel"><h2>Météo au sommet</h2><p>${fmtDayLong(d)} · ${s.top} m · modèles MeteoSwiss (via Open-Meteo)</p><ul class="hours" aria-label="Météo heure par heure">${w.hours.map((h) => { const k = picKind(h); return `<li class="h">${h.t} h${pic(k)}<b>${Math.round(h.temp)}°</b>${k === 'snow' ? (Math.round(h.snow * 10) / 10).toLocaleString('fr-CH') + ' cm' : picTxt[k]}${h.gust > 40 ? `<br><span class="w">${Math.round(h.gust)} km/h</span>` : ''}</li>`; }).join('')}</ul>${s.wxUrl ? `<p style="margin-top:10px">${ext(s.wxUrl, `Météo officielle de la station ${I.arrow}`, 'inl')}</p>` : ''}</section>` : ''}
+      ${camPanel(s)}
+      <section class="panel">
+        <h2>Dormir sur place</h2>
+        <p>${nightsLabel(ci, co)}${st.days.includes(d) && st.days.length > 1 ? ' (tes dates de recherche)' : ' (la veille)'} · ${st.travelers} pers. · ${pres(s.town)} · du moins cher au plus cher</p>
+        ${stayMax(r, ci, co) ? `<p>Filtré à ≤ ${chf(stayMax(r, ci, co))} par nuit pour le groupe, d’après ton budget.</p>` : ''}
+        <div class="acts">${ext(bookingUrl(s, ci, co, stayMax(r, ci, co)), `${I.bed} Booking`, 'btn dark')}${ext(airbnbUrl(s, ci, co, stayMax(r, ci, co)), `${I.home} Airbnb`, 'btn ghost')}</div>
+      </section>
+      ${restoPanel([s], null)}
+      ${p ? prosPanel(r, rank, R, capped, LT) : ''}
+      <section class="panel linklist">
+        <h2>Vérifier avant de partir</h2>
+        ${ext(s.openUrl, `État des pistes (officiel) ${I.arrow}`, '')}
+        ${s.offCam ? ext(s.offCam, `Webcam officielle de la station ${I.arrow}`, '') : ''}
+        ${s.wxUrl ? ext(s.wxUrl, `Météo officielle de la station ${I.arrow}`, '') : ''}
+        ${(s.cams || [null]).map((c, k) => ext(camUrl(s, k), `${s.cams ? 'Webcam Windy ' + (k + 1) : 'Webcams Windy autour'} ${I.arrow}`, '')).join('')}
+        ${s.phone ? `<a href="tel:${s.phone.replace(/\s/g, '')}">Info remontées · ${esc(s.phone)} ${I.chev}</a>` : ''}
+        <button type="button" class="ovr" data-ovr="${s.id}|${d}|${o === 'open' ? 'closed' : 'open'}">Je sais qu’elle est ${o === 'open' ? 'fermée' : 'ouverte'} ce jour</button>
+      </section>
+      ${sc != null ? (chosen ? `<a class="cta" href="#/package">Choisie pour ${forTxt} ✓ · voir le week-end</a>` : `<button type="button" class="cta" data-pick="${s.id}|${d}">Choisir pour ${forTxt}</button>`) : ''}`;
+  }
+  function bindStation() {
+    bindCommon();
+    $('[data-back]').addEventListener('click', () => go(st.prevRoute && !st.prevRoute.startsWith('#/station') ? st.prevRoute : '#/classement'));
+    const o = $('[data-ovr]'); if (o) o.addEventListener('click', () => { const [id, d, v] = o.dataset.ovr.split('|'); overrides[id + '|' + d] = v; store.set('sch-overrides', overrides); toast(v === 'open' ? 'Marquée ouverte' : 'Marquée fermée'); show({ keepScroll: true }); });
+    const p = $('[data-pick]'); if (p) p.addEventListener('click', () => {
+      const [id, d] = p.dataset.pick.split('|');
+      if (!st.days.includes(d)) { const all = [...st.days, d].sort(); st.days = rangeOf(all[0], all[all.length - 1]).slice(0, MAXDAYS); if (!st.days.includes(d)) st.days = [d]; fixMode(); }
+      st.pkgChoice = { all: id }; persist(); toast('Destination de ton week-end'); go('#/package');
+    });
+  }
+
+  function destination() {
+    const id = st.pkgChoice.all;
+    if (id != null && byId[id] != null) { const r = periodRow(byId[id]); if (r.sc != null) return r; }
+    return bestOf('P');
+  }
+  function plan() {
+    const dest = destination();
+    return st.days.map((d) => ({ d, best: dest ? evalRow(dest.i, d) : null }));
+  }
+  const altDest = (dest) => { const R = rowsFor('P'); return [...R.open, ...R.confirm].sort(byScore).filter((r) => !dest || r.s.id !== dest.s.id).slice(0, 3); };
+  function viewPkg() {
+    document.title = 'Mon week-end · Schussly';
+    const dest = destination(), P = plan(), first = P.find((x) => x.best);
+    if (!first) return `<header class="top"><h1>Mon week-end</h1><button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button></header>${critBar()}<div class="empty">Aucune station ouverte pour ces jours.<br><a class="btn dark" href="#/recherche">Changer les critères</a></div>`;
+    const b0 = first.best, n = nights(), L = lodging(P), o = st.data.origin.name;
+    const sameAll = P.every((x) => x.best && x.best.s.id === b0.s.id);
+    const ev = [], legs = []; let roadTotal = 0, roadKm = 0, kmKnown = true;
+    const leg = (from, to, min, km, est) => { legs.push({ from, to, min, km, est }); roadTotal += min || 0; if (km != null) roadKm += km; else kmKnown = false; };
+    if (st.mode === 'eve') {
+      ev.push(['day', fmtDayLong(addDays(st.days[0], -1))]);
+      ev.push([clock(EVE), `Départ de ${esc(o)}`, b0.drive != null ? `arrivée ${pres(b0.s.town)} vers ${clock(EVE + b0.drive)}` : `vers ${esc(b0.s.town)}`]);
+      leg(o, b0.s.town, b0.drive, b0.dist);
+    }
+    P.forEach((x, k) => {
+      ev.push(['day', fmtDayLong(x.d)]);
+      if (!x.best) { ev.push(['—', 'Aucune station ouverte', '']); return; }
+      if (x.best.sc == null && st.mode === 'day') { ev.push(['—', `${esc(x.best.s.name)} fermée ce jour`, 'pas de route ce jour-là']); return; }
+      const r = x.best, fromHome = st.mode === 'day' || (st.mode === 'between' && k === 0);
+      if (fromHome && r.drive != null) { ev.push([clock(PISTES - r.drive - 20), `Départ de ${esc(o)}`, `${roadTxt(r)} de route`]); leg(o, r.s.name, r.drive, r.dist); }
+      ev.push([clock(PISTES), `Pistes · ${esc(r.s.name)}`, r.sc == null ? 'station fermée ce jour : voir Plan B' : `${r.sc}/100 · ${condWord(r.w).toLowerCase()}, ${hm(r.w.sunMin)} de soleil, rafales ${Math.round(r.w.gust)} km/h${r.o !== 'open' ? ' · ouverture à confirmer' : ''}`]);
+      const nx = P[k + 1] && P[k + 1].best;
+      if (st.mode === 'day' || !nx) {
+        if (r.drive != null) { ev.push([clock(LEAVE_SKI), `Retour vers ${esc(o)}`, `arrivée vers ${clock(LEAVE_SKI + r.drive)}`]); leg(r.s.name, o, r.drive, r.dist); }
+        else ev.push([clock(LEAVE_SKI), `Retour vers ${esc(o)}`, '']);
+      } else if (nx.s.id !== r.s.id) {
+        const t = transferEst(r.s, nx.s);
+        const tk = Math.round(hav(r.s, nx.s) * 1.3);
+        ev.push([clock(LEAVE_SKI), `Route vers ${esc(nx.s.town)}`, `≈ ${hm(t)} · ≈ ${tk} km (estimation) · nuit ${pres(nx.s.town)}`]);
+        leg(r.s.name, nx.s.town, t, tk, true);
+      } else ev.push([clock(LEAVE_SKI + 30), `Nuit ${pres(r.s.town)}`, '']);
+    });
+    const tooMuch = st.mode === 'day' && roadTotal > 240;
+    const swMode = st.days.length > 1 && consecutive(st.days) ? 'between' : 'eve';
+    const swN = swMode === 'between' ? st.days.length - 1 : st.days.length;
+    const shareQ = `?d=${st.days.join(',')}&s=${dest.s.id}&m=${st.mode}&o=${encodeURIComponent(st.origin)}&p=${st.travelers}`;
+    const sub = P.length > 1 ? `${P.length} jours sur place${dest.o === 'part' ? ' · pas ouverte tous les jours' : ''}` : fmtDayLong(first.d);
+    const Cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+    // ----- budget du programme -----
+    const B = st.budget, pax = st.travelers;
+    const liters = roadKm * consNow() / 100, fuel = fuelCHF(roadKm);
+    const lunches = P.filter((x) => x.best && x.best.sc != null).map((x) => mealAvg(x.best.s, 'p'));
+    const dinnersN = L.map((b) => ({ n: diffDays(b.ci, b.co), p: mealAvg(b.row.s, 'v') }));
+    const food = pax * (lunches.reduce((a, x) => a + x, 0) + dinnersN.reduce((a, x) => a + x.n * x.p, 0));
+    const totN = L.reduce((a, b) => a + diffDays(b.ci, b.co), 0);
+    const lodgeEst = totN * (+st.set.night || 100) * rooms();
+    const fuelB = B.fuel ? fuel : 0, foodB = B.food ? food : 0, lodgeB = B.lodge ? lodgeEst : 0;
+    const perNight = B.lodge && totN ? Math.floor((B.max - fuelB - foodB) / totN) : null, mx = nightMax(perNight);
+    const meals = pax * (lunches.length + dinnersN.reduce((a, x) => a + x.n, 0));
+    const mealCap = B.food && meals ? Math.max(0, Math.floor((B.max - fuelB - lodgeB) / meals)) : null;
+    const tot = fuelB + foodB + lodgeB, left = B.max - tot;
+    const tripPanel = `<section class="panel"><h2>Trajet détaillé</h2><p>${esc(CARS[st.set.car] ? CARS[st.set.car].l : 'Ma voiture')} · ${consNow().toLocaleString('fr-CH', { maximumFractionDigits: 1 })} l/100 km · ${(+st.set.fuel).toFixed(2)} CHF/l · <a href="#/reglages">modifier</a></p>
+      ${legs.map((g) => `<div class="bud"><span>${esc(g.from)} → ${esc(g.to)}<small>${g.min != null ? hm(g.min) : '–'}${g.est ? ' · estimation' : ''}</small></span><b>${g.km != null ? g.km + ' km' : '–'}</b></div>`).join('')}
+      <div class="bud tot"><span>Total aller-retour<small>${hm(roadTotal)} de route · ${(Math.round(liters * 10) / 10).toLocaleString('fr-CH')} l d’essence</small></span><b>${roadKm} km</b></div>
+      <div class="bud"><span>Essence aller-retour<small>soit ${chf(fuel / pax)} par personne</small></span><b>${kmKnown ? '' : '≥ '}${chf(fuel)}</b></div>
+      ${ext(mapsUrl(b0.s), `${I.car} Ouvrir l’itinéraire`, 'btn ghost')}</section>`;
+    const budPanel = budgetOn() ? `<section class="panel"><h2>Budget du groupe</h2><p>${pax} pers. · budget max ${chf(B.max)} · <a href="#/recherche">modifier</a></p>
+      ${B.fuel ? `<div class="bud"><span>Essence<small>${roadKm} km aller-retour</small></span><b>${chf(fuel)}</b></div>` : ''}
+      ${B.food ? `<div class="bud"><span>Repas<small>${lunches.length} midi${lunches.length > 1 ? 's' : ''}${dinnersN.length ? ` + ${totN} soir${totN > 1 ? 's' : ''}` : ''} × ${pax} pers., prix moyens des restaurants</small></span><b>${chf(food)}</b></div>` : ''}
+      ${B.lodge && totN ? `<div class="bud"><span>Hébergement (estimation)<small>${totN} nuit${totN > 1 ? 's' : ''} × ${rooms()} chambre${rooms() > 1 ? 's' : ''} × ${chf(st.set.night)}</small></span><b>${chf(lodgeEst)}</b></div>` : ''}
+      <div class="bud tot"><span>Total estimé</span><b>${chf(tot)}</b></div>
+      <div class="bud"><span>${left >= 0 ? 'Reste' : 'Dépassement'}</span><b style="color:${left >= 0 ? 'var(--good)' : 'var(--warn)'}">${left >= 0 ? chf(left) : '+' + chf(-left)}</b></div>
+      ${B.lodge && totN ? `<p class="note">${perNight > 0 ? `Il reste ${chf(perNight)} par nuit pour dormir après essence et repas&nbsp;: c’est le plafond appliqué sur Booking et Airbnb.` : 'Essence et repas prennent déjà tout le budget&nbsp;: monte le curseur ou passe en Journée.'}</p>` : ''}</section>` : '';
+    return `
+      <header class="top"><h1>Mon week-end</h1><button type="button" class="iconbtn" id="share" data-q="${esc(shareQ)}" aria-label="Partager le plan">${I.share}</button><button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button></header>
+      ${critBar()}
+      ${dataBanner()}
+      <article class="wcard ${theme(dest.w)}">
+        <p class="kicker" style="margin:0">${st.days.map(fmtDay).join(' + ')} · ${st.travelers} pers. · Magic Pass</p>
+        <h2 class="cond">${esc(b0.s.name)}</h2>
+        <div class="big">${dest.sc}<sup aria-hidden="true">/100</sup><span class="sr"> sur 100</span></div>
+        <div class="where">${verdict(dest.sc, dest.o)}<small>${esc(sub)}</small></div>
+        <div class="acts">${ext(mapsUrl(b0.s), `${I.car} Itinéraire`, 'btn dark')}<a class="btn" href="#/station/${b0.s.id}/${first.d}">Fiche station</a></div>
+      </article>
+      ${tooMuch ? `<div class="alert" role="note"><b>${hm(roadTotal)} de route sur le week-end.</b>Dormir sur place t’évite au moins un aller-retour.<button type="button" class="btn" data-mode="${swMode}">Passer en ${swN} nuit${swN > 1 ? 's' : ''}</button></div>` : ''}
+      ${budPanel}
+      <section class="panel"><h2>Programme</h2><ol class="tl">${ev.map((e) => e[0] === 'day' ? `<li class="dayh">${e[1]}</li>` : `<li><time>${e[0]}</time><b>${e[1]}</b>${e[2] ? `<small>${e[2]}</small>` : ''}</li>`).join('')}</ol></section>
+      <section class="panel">
+        <h2>${n ? 'Où dormir' : 'Envie de dormir sur place ?'}</h2>
+        ${n ? L.map((b) => `<div class="night"><b>${Cap(pres(b.row.s.town))}</b><p>${nightsLabel(b.ci, b.co)} · ${st.travelers} pers. · ${rooms()} chambre${rooms() > 1 ? 's' : ''} · triés par prix${mx ? ` · ≤ ${chf(mx)}/nuit (ton budget)` : B.lodge ? ` · ≈ ${chf(st.set.night * rooms())}/nuit estimé` : ''}</p><div class="acts">${ext(bookingUrl(b.row.s, b.ci, b.co, mx), `${I.bed} Booking`, 'btn dark')}${ext(airbnbUrl(b.row.s, b.ci, b.co, mx), `${I.home} Airbnb`, 'btn ghost')}</div></div>`).join('')
+          : `<p>Une nuit ${pres(b0.s.town)} la veille t’évite de partir à ${b0.drive != null ? clock(PISTES - b0.drive - 20) : 'l’aube'}.</p><div class="acts">${ext(bookingUrl(b0.s, addDays(first.d, -1), first.d), `${I.bed} Booking`, 'btn dark')}${ext(airbnbUrl(b0.s, addDays(first.d, -1), first.d), `${I.home} Airbnb`, 'btn ghost')}</div>`}
+      </section>
+      ${tripPanel}
+      ${restoPanel(P.filter((x) => x.best).map((x) => x.best.s), mealCap)}
+      ${altDest(dest).length ? `<section class="panel"><h2>Plan B</h2><p>Autres destinations pour toute la période, en un tap.</p>${altDest(dest).map((r) => `<div class="opt"><div class="grow"><b>${esc(r.s.name)} · ${r.sc}/100</b><span>${r.drive != null ? hm(r.drive) + (r.dist != null ? ' · ' + r.dist + ' km' : '') : 'route ?'} · ${condWord(r.w).toLowerCase()}${r.o !== 'open' ? ' · ' + stateTxt[r.o].toLowerCase() : ''}</span></div><button type="button" class="btn ghost" style="min-height:44px" data-swap="${r.s.id}" aria-label="Choisir ${esc(r.s.name)}">Choisir</button></div>`).join('')}</section>` : ''}`;
+  }
+  function bindPkg() {
+    bindCommon();
+    $$('[data-swap]').forEach((b) => b.addEventListener('click', () => { st.pkgChoice = { all: b.dataset.swap }; persist(); toast('Plan mis à jour'); show(); window.scrollTo(0, 0); }));
+    $$('[data-mode]').forEach((b) => b.addEventListener('click', () => { st.mode = b.dataset.mode; fixMode(true); persist(); toast('Format avec nuit sur place'); show(); }));
+    const sh = $('#share'); if (sh) sh.addEventListener('click', async () => {
+      const P = plan();
+      const url = location.href.split('#')[0] + '#/package' + sh.dataset.q;
+      const D = destination(); const txt = `Notre week-end ski : ${D ? D.s.name + ' (' + D.sc + '/100)' : '—'}\n${st.days.map(fmtDay).join(' → ')}`;
+      try { if (navigator.share) { await navigator.share({ title: 'Week-end ski · Schussly', text: txt, url }); return; } await navigator.clipboard.writeText(txt + '\n' + url); toast('Lien du plan copié'); }
+      catch (e) { if (!e || e.name !== 'AbortError') toast('Impossible de partager ici'); }
+    });
+  }
+
+  // ---------- routeur ----------
+  function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2000); }
+  function go(h, replace) { if (replace) { history.replaceState(null, '', h); onRoute(); } else if (location.hash === h) show(); else location.hash = h; }
+  function route() { const h = location.hash.split('?')[0].replace(/^#\/?/, '').split('/'); return { name: h[0] || 'classement', a: h[1], b: h[2] }; }
+  const brand = `<header class="top"><div class="logo"><i aria-hidden="true"></i>Schussly</div><button type="button" class="iconbtn themebtn" data-theme-toggle aria-label="Basculer mode clair / sombre"><svg class="sunic" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="moon" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button></header>`;
+  function show(opt = {}) {
+    const R = route(), y = window.scrollY;
+    const tab = ['recherche', 'criteres'].includes(R.name) ? 'search' : R.name === 'package' ? 'pkg' : R.name === 'reglages' ? 'set' : 'rank';
+    $$('nav.tabs a').forEach((a) => a.dataset.tab === tab ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+    const v = $('#view');
+    v.setAttribute('aria-busy', String(!st.data || st.loading));
+    if (!st.data) {
+      v.innerHTML = st.error
+        ? `${brand}<div class="empty"><b>Impossible de charger les prévisions.</b><p>${esc(st.error)}</p><button type="button" class="btn dark" data-retry>Réessayer</button></div>`
+        : `${brand}<div class="skel" role="status"><span class="sr">Chargement</span></div><p class="note" style="text-align:center">Analyse de ${S.length} stations…</p>`;
+      const rt = $('[data-retry]'); if (rt) rt.addEventListener('click', () => load(st.origin));
+      return;
+    }
+    if (!st.avail.length) { v.innerHTML = `${brand}<div class="empty"><b>Données de démo expirées.</b><p>Ouvre la version en ligne pour les prévisions du jour.</p></div>`; return; }
+    let html = null;
+    if (R.name === 'station') { const d = st.avail.includes(R.b) ? R.b : (st.activeDay || st.days[0]); html = viewStation(R.a, d); if (html) { v.innerHTML = html; bindStation(); } }
+    if (html == null) {
+      if (R.name === 'package') { v.innerHTML = viewPkg(); bindPkg(); }
+      else if (R.name === 'recherche' || R.name === 'criteres') { document.title = 'Recherche · Schussly'; v.innerHTML = viewSearch(); bindSearch(); }
+      else if (R.name === 'reglages') { document.title = 'Réglages · Schussly'; v.innerHTML = viewSettings(); bindSettings(); }
+      else { document.title = 'Classement · Schussly'; v.innerHTML = viewRank(); bindRank(); }
+    }
+    if (opt.keepScroll) window.scrollTo(0, y);
+    if (opt.focus) { const f = $(opt.focus); if (f) f.focus({ preventScroll: true }); }
+  }
+  let cur = location.hash || '#/classement';
+  function onRoute() {
+    const prev = cur; cur = location.hash || '#/classement';
+    if (prev === cur) { show(); return; }
+    ses.set('y:' + prev.split('?')[0], String(window.scrollY));
+    st.prevRoute = prev;
+    const r = route(); if (r.name === 'station' && st.days.includes(r.b)) st.activeDay = r.b;
+    show();
+    const restore = cur.startsWith('#/classement') && prev.startsWith('#/station');
+    window.scrollTo(0, restore ? (+ses.get('y:' + cur.split('?')[0]) || 0) : 0);
+    if (!restore) $('#view').focus({ preventScroll: true });
+  }
+  window.addEventListener('hashchange', onRoute);
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-theme-toggle]')) return;
+    const dark = document.documentElement.dataset.theme !== 'dark';
+    if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
+    try { localStorage.setItem('sch-theme', dark ? 'dark' : 'light'); } catch (err) {}
+    $('#themecolor').setAttribute('content', dark ? '#121314' : '#FFFFFF');
+    toast(dark ? 'Mode sombre' : 'Mode clair');
+  });
+  if (document.documentElement.dataset.theme === 'dark') $('#themecolor').setAttribute('content', '#121314');
+
+  async function load(q) {
+    st.loading = true; st.error = null; st.geoError = null; show({ keepScroll: true });
+    let origin = null;
+    try { origin = await geocode(q); }
+    catch (e) {
+      if (e instanceof GeoError) {
+        st.loading = false; st.geoError = `« ${q} » introuvable. Vérifie l’orthographe (ex. Lausanne, Sion, Genève).`; st.originDraft = q;
+        if (st.data) { if (route().name !== 'recherche') go('#/recherche'); else show(); } else fallback(st.origin);
+        return false;
+      }
+    }
+    if (origin) {
+      try {
+        const [wx, rt] = await Promise.all([weatherAll(), drives(origin).catch(() => null)]);
+        st.data = { origin, wx, dr: rt && rt.dr, dist: rt && rt.dist, live: true, when: new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' }) };
+        st.origin = q; finish(); return true;
+      } catch (e) { /* bascule sur les données figées */ }
+    }
+    fallback(q); return true;
+  }
+  // communes rattachées à la ville de départ précalculée la plus proche (version hors ligne)
+  const ALIASES = Object.fromEntries([
+    ['Lausanne', 'Pully Prilly Epalinges Le Mont-sur-Lausanne Crissier Ecublens Chavannes-près-Renens Lutry Paudex Belmont-sur-Lausanne Romanel Bussigny Cheseaux Jouxtens Saint-Sulpice Savigny Cugy Lausanne-gare Ouchy'],
+    ['Genève', 'Carouge Lancy Meyrin Vernier Onex Thônex Chêne-Bourg Chêne-Bougeries Plan-les-Ouates Versoix Cologny Grand-Saconnex Bernex Genf Geneva'],
+    ['Sion', 'Sierre Conthey Savièse Vétroz Nendaz Grimisuat'], ['Fribourg', 'Marly Villars-sur-Glâne Givisiez Granges-Paccot Freiburg'],
+    ['Neuchâtel', 'Peseux Hauterive Marin Boudry La Chaux-de-Fonds Le Locle'], ['Berne', 'Bern Köniz Ostermundigen Muri Thun Thoune Bienne Biel'],
+    ['Montreux', 'Clarens La Tour-de-Peilz Villeneuve'], ['Vevey', 'Corsier-sur-Vevey Corseaux Saint-Légier Blonay Chexbres'],
+    ['Morges', 'Préverenges Tolochenaz Saint-Prex Echichens Aubonne Rolle'], ['Nyon', 'Gland Prangins Coppet Founex Commugny'],
+    ['Yverdon-les-Bains', 'Yverdon Grandson Orbe Chavornay Echallens'], ['Martigny', 'Fully Saxon Leytron Verbier Le Châble'],
+    ['Bulle', 'Gruyères Broc Châtel-Saint-Denis Romont'], ['Monthey', 'Collombey Saint-Maurice Bex'], ['Aigle', 'Ollon Leysin Villars-sur-Ollon'],
+    ['Zurich', 'Zürich Winterthur Baden Zoug Zug Lucerne Luzern']
+  ].flatMap(([city, list]) => list.split(' ').map((c) => [c.replace(/-/g, ' ').trim(), city]).concat(list.includes('-') ? list.split(' ').map((c) => [c, city]) : [])));
+  function fallback(q) {
+    const snap = window.SNAPSHOT;
+    if (!snap) { st.error = 'Vérifie ta connexion puis réessaie.'; st.loading = false; show(); return; }
+    const norm = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const routes = snap.routes || { [snap.origin.name]: { lat: snap.origin.lat, lon: snap.origin.lon, drive: snap.drive, dist: snap.dist } };
+    const nq = norm(q);
+    let key = Object.keys(routes).find((k) => nq.includes(norm(k)) || (nq.length >= 3 && norm(k).startsWith(nq)));
+    if (!key) { const a = Object.entries(ALIASES).find(([k]) => nq.includes(norm(k))); if (a && routes[a[1]]) key = a[1]; }
+    const rt = key ? routes[key] : null;
+    st.data = { origin: rt ? { name: key, lat: rt.lat, lon: rt.lon } : { name: q, query: q, lat: null, lon: null }, agg: snap.days, dr: rt ? rt.drive : null, dist: rt ? rt.dist : null, live: false, when: snap.generatedAt, cities: Object.keys(routes) };
+    st.origin = q; finish();
+  }
+  function finish() {
+    st.avail = availDates();
+    st.days = st.days.filter((d) => st.avail.includes(d));
+    if (st.days.length) st.days = rangeOf(st.days[0], st.days[st.days.length - 1]).filter((d) => st.avail.includes(d)).slice(0, MAXDAYS);
+    if (!st.days.length && st.avail.length) {
+      const sat = st.avail.find((d) => dow(d) === 6);
+      st.days = sat ? [sat, addDays(sat, 1)].filter((d) => st.avail.includes(d)) : [st.avail[0]];
+    }
+    if (!st.pkgChoice.all) st.pkgChoice = {};
+    fixMode(true); persist();
+    st.loading = false; show();
+  }
+  if (!location.hash) history.replaceState(null, '', '#/classement');
+  show(); load(st.origin);
+  if ('serviceWorker' in navigator && location.protocol === 'https:' && !/claude\.ai|claudeusercontent/.test(location.host)) { navigator.serviceWorker.register('sw.js').catch(() => {}); }
+})();
+</script>
+</body>
+</html>
